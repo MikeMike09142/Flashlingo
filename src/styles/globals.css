@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos para el modo oscuro */
+.dark {
+  color-scheme: dark;
+}
+
+/* Estilos para el modo claro */
+:root {
+  color-scheme: light;
+}
+
+.dark .btn-reset-progress {
+  background-color: #6b1616; /* Tono oscuro de error similar a error-900 */
+  color: #fecaca; /* Tono claro de error similar a error-200 */
+} 
