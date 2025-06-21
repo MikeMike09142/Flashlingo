@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   };
   
   const handleCreateCard = () => {
-    navigate('/create');
+    navigate('/flashcard/new');
   };
   
   return (

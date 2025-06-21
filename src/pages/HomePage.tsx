@@ -1,40 +1,33 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import { LanguageLevel } from '../types';
-import { 
-  BookOpen, 
-  Plus, 
-  Search, 
-  Grid, 
-  List, 
-  Filter,
-  ChevronDown
-} from 'lucide-react';
-import { FixedSizeList as ListWindow } from 'react-window';
-import { ListChildComponentProps } from 'react-window';
+import { Plus, Search, BookOpen, ChevronDown, Grid, List, Download, Upload } from 'lucide-react';
 import FlashcardItem from '../components/flashcard/FlashcardItem';
-import FlashcardGrid from '../components/flashcard/FlashcardGrid';
-import FlashcardList from '../components/flashcard/FlashcardList';
+import { LanguageLevel, Flashcard } from '../types';
 
 const HomePage: React.FC = () => {
-  const { 
-    homePageFlashcards,
+  const {
+    filteredFlashcards,
     categories,
     activeCategory,
     searchTerm,
     sortOption,
     viewMode,
-    selectedLevel,
     setActiveCategory,
     setSearchTerm,
     setSortOption,
     setViewMode,
-    setSelectedLevel,
-    creationTargetLanguage
+    flashcards: allFlashcards,
+    setFlashcards,
+    isLoading,
   } = useAppContext();
 
   const [isLevelDropdownOpen, setIsLevelDropdownOpen] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState<LanguageLevel | null>(null);
+
+  const flashcardsOnScreen = selectedLevel
+    ? filteredFlashcards.filter(card => card.level === selectedLevel)
+    : filteredFlashcards;
 
   const handleLevelChange = (level: LanguageLevel | null) => {
     setSelectedLevel(level);
@@ -45,20 +38,82 @@ const HomePage: React.FC = () => {
     setIsLevelDropdownOpen(prev => !prev);
   };
 
-  // Logs de depuración
-  console.log('Rendering Home Page. homePageFlashcards count:', homePageFlashcards.length, 'Filters:', { activeCategory, searchTerm, selectedLevel, creationTargetLanguage });
+  const handleExport = () => {
+    const dataStr = JSON.stringify(allFlashcards, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'my_flashcards.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileReader = new FileReader();
+    if (event.target.files && event.target.files[0]) {
+      fileReader.readAsText(event.target.files[0], "UTF-8");
+      fileReader.onload = e => {
+        try {
+          const importedFlashcards = JSON.parse(e.target?.result as string) as Flashcard[];
+          // Basic validation
+          if (Array.isArray(importedFlashcards) && importedFlashcards.every(card => 'id' in card && 'englishWord' in card)) {
+            setFlashcards(importedFlashcards);
+            alert('Flashcards imported successfully!');
+          } else {
+            throw new Error('Invalid file format.');
+          }
+        } catch (error) {
+          console.error("Error importing flashcards:", error);
+          alert('Failed to import flashcards. Please check the file format.');
+        }
+      };
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen dark:bg-gray-900 text-gray-900 dark:text-white">
+        Cargando datos...
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-neutral-800">My Flashcards</h1>
-        <Link
-          to="/create"
-          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add Flashcard
-        </Link>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
+        <h1 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">My Flashcards</h1>
+        <div className="flex items-center flex-wrap justify-start md:justify-end gap-2">
+          <button
+            onClick={handleExport}
+            className="flex items-center px-4 py-2 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-100 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors duration-200"
+          >
+            <Download className="w-5 h-5 mr-2" />
+            Export
+          </button>
+          <button
+            onClick={() => document.getElementById('import-input')?.click()}
+            className="flex items-center px-4 py-2 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-100 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors duration-200"
+          >
+            <Upload className="w-5 h-5 mr-2" />
+            Import
+          </button>
+          <input
+            type="file"
+            id="import-input"
+            className="hidden"
+            accept=".json"
+            onChange={handleImport}
+          />
+          <Link
+            to="/flashcards/new"
+            className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Add Flashcard
+          </Link>
+        </div>
       </div>
 
       <div className="mb-6 space-y-4">
@@ -76,7 +131,6 @@ const HomePage: React.FC = () => {
 
         {/* Filters */}
         <div className="flex flex-wrap gap-4">
-
           {/* Level Filter */}
           <div className="relative">
             <button
@@ -140,28 +194,20 @@ const HomePage: React.FC = () => {
       {/* Flashcards Grid/List */}
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {homePageFlashcards.map(flashcard => (
+          {flashcardsOnScreen.map(flashcard => (
             <div key={flashcard.id} className="h-full min-h-[260px] max-h-[380px] flex">
               <FlashcardItem flashcard={flashcard} />
             </div>
           ))}
         </div>
       ) : (
-        <ListWindow
-          height={600}
-          itemCount={homePageFlashcards.length}
-          itemSize={120}
-          width="100%"
-        >
-          {({ index, style }: ListChildComponentProps) => {
-            const flashcard = homePageFlashcards[index];
-            return (
-              <div style={style} key={flashcard.id}>
-                <FlashcardItem flashcard={flashcard} />
-              </div>
-            );
-          }}
-        </ListWindow>
+        <div className="flex flex-col gap-2">
+          {flashcardsOnScreen.map(flashcard => (
+            <div key={flashcard.id} className="h-[120px] flex">
+              <FlashcardItem flashcard={flashcard} />
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

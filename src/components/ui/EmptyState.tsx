@@ -16,7 +16,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   description,
   icon,
   actionText = "Create New Card",
-  actionLink = "/create",
+  actionLink = "/flashcard/new",
   onAction,
 }) => {
   return (

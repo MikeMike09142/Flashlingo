@@ -21,8 +21,10 @@ const FlashcardDetailPage: React.FC = () => {
     getFlashcardById, 
     getCategoryById, 
     toggleFavorite, 
-    deleteFlashcard 
+    deleteFlashcard,
+    studyTargetLanguage
   } = useAppContext();
+  console.log('studyTargetLanguage en detalle:', studyTargetLanguage);
   
   const [isFlipped, setIsFlipped] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -175,40 +177,48 @@ const FlashcardDetailPage: React.FC = () => {
               {/* Back Side */}
               <div className={`absolute inset-0 [backface-visibility:hidden] ${isFlipped ? '' : 'hidden'} [transform:rotateY(180deg)]`}>
                 <div className="flex-1 flex flex-col justify-center items-center text-center">
-                   {/* Back side: Show Spanish or French based on content */}
-                   {(flashcard.spanishTranslation || flashcard.frenchTranslation) ? (
+                   {/* Back side: Show translation and sentence based on studyTargetLanguage */}
+                   {(studyTargetLanguage === 'french' ? flashcard.frenchTranslation : flashcard.spanishTranslation) ? (
                       <>
                          <div className="flex items-center justify-center mb-2 break-words">
                            <h2 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100 mr-2">
-                              {flashcard.spanishTranslation || flashcard.frenchTranslation}
+                              {studyTargetLanguage === 'french' ? flashcard.frenchTranslation : flashcard.spanishTranslation}
                            </h2>
                            <button
                              onClick={(e) => {
                                e.stopPropagation();
-                               const utterance = new SpeechSynthesisUtterance(flashcard.spanishTranslation || flashcard.frenchTranslation || '');
-                               utterance.lang = flashcard.spanishTranslation ? 'es-ES' : 'fr-FR';
-                               window.speechSynthesis.speak(utterance);
+                               const text = studyTargetLanguage === 'french' ? flashcard.frenchTranslation : flashcard.spanishTranslation;
+                               const lang = studyTargetLanguage === 'french' ? 'fr-FR' : 'es-ES';
+                               if (text) {
+                                 const utterance = new SpeechSynthesisUtterance(text);
+                                 utterance.lang = lang;
+                                 window.speechSynthesis.speak(utterance);
+                               }
                              }}
                              className="p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900 rounded-full transition-colors duration-200"
-                             aria-label="Pronounce translation"
+                             aria-label={`Pronounce ${studyTargetLanguage === 'french' ? 'French translation' : 'Spanish translation'}`}
                            >
                              <Volume2 size={24} />
                            </button>
                          </div>
-                         {(flashcard.spanishSentence || flashcard.frenchSentence) && (
+                         {(studyTargetLanguage === 'french' ? flashcard.frenchSentence : flashcard.spanishSentence) && (
                            <div className="flex items-center justify-center mb-2 break-words">
                              <p className="text-neutral-600 dark:text-neutral-300 italic mr-2">
-                                {flashcard.spanishSentence || flashcard.frenchSentence || ''}
+                                {studyTargetLanguage === 'french' ? flashcard.frenchSentence : flashcard.spanishSentence}
                              </p>
                              <button
                                onClick={(e) => {
                                  e.stopPropagation();
-                                 const utterance = new SpeechSynthesisUtterance(flashcard.spanishSentence || flashcard.frenchSentence || '');
-                                 utterance.lang = flashcard.spanishSentence ? 'es-ES' : 'fr-FR';
-                                 window.speechSynthesis.speak(utterance);
+                                 const text = studyTargetLanguage === 'french' ? flashcard.frenchSentence : flashcard.spanishSentence;
+                                 const lang = studyTargetLanguage === 'french' ? 'fr-FR' : 'es-ES';
+                                 if (text) {
+                                   const utterance = new SpeechSynthesisUtterance(text);
+                                   utterance.lang = lang;
+                                   window.speechSynthesis.speak(utterance);
+                                 }
                                }}
                                className="p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900 rounded-full transition-colors duration-200"
-                               aria-label="Pronounce sentence"
+                               aria-label={`Pronounce ${studyTargetLanguage === 'french' ? 'French sentence' : 'Spanish sentence'}`}
                              >
                                <Volume2 size={24} />
                              </button>

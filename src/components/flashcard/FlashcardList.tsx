@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flashcard } from '../../types';
-import { Star, Check, Volume2, ChevronRight } from 'lucide-react';
+import { Star, Volume2, ChevronRight } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,7 +13,7 @@ const FlashcardList: React.FC<FlashcardListProps> = ({
   flashcards,
   emptyMessage = "No flashcards found"
 }) => {
-  const { toggleFavorite, toggleLearned, getCategoryById } = useAppContext();
+  const { toggleFavorite, categories } = useAppContext();
   const navigate = useNavigate();
   
   const handlePronunciation = (e: React.MouseEvent, word: string) => {
@@ -24,7 +24,7 @@ const FlashcardList: React.FC<FlashcardListProps> = ({
   };
   
   const handleSelectCard = (id: string) => {
-    navigate(`/flashcard/${id}`);
+    navigate(`/flashcards/edit/${id}`);
   };
   
   if (flashcards.length === 0) {
@@ -42,23 +42,23 @@ const FlashcardList: React.FC<FlashcardListProps> = ({
   }
   
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <div className="divide-y divide-neutral-100">
+    <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm overflow-hidden">
+      <div className="divide-y divide-neutral-100 dark:divide-neutral-700">
         {flashcards.map(flashcard => {
-          const categories = flashcard.categoryIds
-            .map(id => getCategoryById(id))
+          const categoriesList = (flashcard.categoryIds || [])
+            .map(id => categories.find(cat => cat.id === id))
             .filter(cat => cat !== undefined);
             
           return (
             <div 
               key={flashcard.id}
-              className="p-4 hover:bg-neutral-50 transition-colors duration-200 cursor-pointer"
+              className="p-4 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors duration-200 cursor-pointer"
               onClick={() => handleSelectCard(flashcard.id)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center mb-1">
-                    <h3 className="text-lg font-medium text-neutral-800 truncate mr-2">
+                    <h3 className="text-lg font-medium text-neutral-800 dark:text-neutral-100 truncate mr-2">
                       {flashcard.englishWord}
                     </h3>
                     
@@ -73,14 +73,10 @@ const FlashcardList: React.FC<FlashcardListProps> = ({
                     {flashcard.isFavorite && (
                       <Star size={16} className="text-warning-500 ml-1" />
                     )}
-                    
-                    {flashcard.isLearned && (
-                      <Check size={16} className="text-success-500 ml-1" />
-                    )}
                   </div>
                   {/* Pronounce sentence button */}
                   <div className="flex items-center mt-1">
-                    <p className="text-sm text-neutral-600 italic truncate mr-2">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-300 italic truncate mr-2">
                       {flashcard.englishSentence}
                     </p>
                     <button
@@ -98,7 +94,7 @@ const FlashcardList: React.FC<FlashcardListProps> = ({
                   </div>
                   
                   <div className="flex flex-wrap gap-1 mb-2">
-                    {categories.map(category => category && (
+                    {categoriesList.map(category => category && (
                       <span
                         key={category.id}
                         className="px-2 py-0.5 bg-primary-50 text-primary-700 text-xs font-medium rounded-full"
@@ -108,7 +104,7 @@ const FlashcardList: React.FC<FlashcardListProps> = ({
                     ))}
                   </div>
                   
-                  <p className="text-sm text-neutral-500 truncate">
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400 truncate">
                     {flashcard.spanishTranslation}
                   </p>
                 </div>

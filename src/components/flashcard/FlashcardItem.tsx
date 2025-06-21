@@ -10,15 +10,11 @@ interface FlashcardItemProps {
 }
 
 const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) => {
-  console.log('Rendering FlashcardItem for:', flashcard.englishWord, flashcard.id); // Log de depuración
-  console.log('Flashcard data:', flashcard); // Nuevo log para ver todos los datos
   const [isFlipped, setIsFlipped] = useState(false);
-  console.log('isFlipped:', isFlipped); // Nuevo log para ver el estado de volteo
-  const { toggleFavorite, getCategoryById, deleteFlashcard, studyTargetLanguage } = useAppContext();
+  const { toggleFavorite, deleteFlashcard, categories, getCategoryById, studyTargetLanguage } = useAppContext();
   const navigate = useNavigate();
   
   const handleFlip = () => {
-    console.log('Flipping card, current state:', isFlipped);
     setIsFlipped(!isFlipped);
   };
   
@@ -36,7 +32,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
   
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/edit/${flashcard.id}`);
+    navigate(`/flashcards/edit/${flashcard.id}`);
   };
   
   const handleDelete = (e: React.MouseEvent) => {
@@ -47,17 +43,27 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
   };
   
   const getCategories = (): Category[] => {
-    // Verificar si categoryIds existe y es un array antes de intentar mapear
     if (!flashcard.categoryIds || !Array.isArray(flashcard.categoryIds)) {
-      return []; // Devolver un array vacío si categoryIds no es válido
+      return [];
     }
     return flashcard.categoryIds
-      .map(id => getCategoryById(id))
+      .map(id => categories.find(cat => cat.id === id))
       .filter((cat): cat is Category => cat !== undefined);
   };
   
-  const categories = getCategories();
+  const categoriesList = getCategories();
   
+  const targetTranslation = studyTargetLanguage === 'french' 
+    ? flashcard.frenchTranslation 
+    : flashcard.spanishTranslation;
+  
+  const targetSentence = studyTargetLanguage === 'french'
+    ? flashcard.frenchSentence
+    : flashcard.spanishSentence;
+
+  const targetLang = studyTargetLanguage === 'french' ? 'fr-FR' : 'es-ES';
+  const targetLangName = studyTargetLanguage === 'french' ? 'francés' : 'español';
+
   return (
     <div className="w-full h-full">
       <div
@@ -68,7 +74,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
           {/* Top Section: Categories, Level, and Favorite */}
           <div className="flex justify-between items-start mb-2">
             <div className="flex flex-wrap gap-1">
-              {categories.map(category => (
+              {categoriesList.map(category => (
                 <span 
                   key={category.id}
                   className="px-2 py-0.5 bg-primary-50 text-primary-700 text-xs font-medium rounded-full"
@@ -102,29 +108,27 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
           {/* Content Section: Word/Translation and Sentence */}
           <div className="flex-1 flex flex-col justify-center items-center text-center overflow-y-auto">
             {isFlipped ? (
-              // Back side: Show Spanish or French based on content
+              // Back side: Show Spanish translation
               <>
-                 {(flashcard.spanishTranslation || flashcard.frenchTranslation) ? (
+                 {targetTranslation ? (
                     <>
                        <div className="flex items-center justify-center mb-2 break-words">
-                         <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 mr-2">{flashcard.spanishTranslation || flashcard.frenchTranslation}</h2>
-                         {(flashcard.spanishTranslation || flashcard.frenchTranslation) && (
-                           <button
-                             onClick={(e) => handlePronunciation(e, flashcard.spanishTranslation || flashcard.frenchTranslation || '', studyTargetLanguage === 'french' ? 'fr-FR' : 'es-ES')}
-                             className="p-1 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
-                             aria-label={`Pronounce ${studyTargetLanguage === 'french' ? 'French translation' : 'Spanish translation'}`}
-                           >
-                             <Volume2 size={20} />
-                           </button>
-                         )}
+                         <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 mr-2">{targetTranslation}</h2>
+                         <button
+                           onClick={(e) => handlePronunciation(e, targetTranslation || '', targetLang)}
+                           className="p-1 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
+                           aria-label={`Pronounce ${targetLangName} translation`}
+                         >
+                           <Volume2 size={20} />
+                         </button>
                        </div>
-                       {(flashcard.spanishSentence || flashcard.frenchSentence) && (
+                       {targetSentence && (
                          <div className="flex items-center justify-center mb-2 break-words">
-                           <p className="text-neutral-600 dark:text-neutral-300 italic mr-2">{flashcard.spanishSentence || flashcard.frenchSentence}</p>
+                           <p className="text-neutral-600 dark:text-neutral-300 italic mr-2">{targetSentence}</p>
                            <button
-                             onClick={(e) => handlePronunciation(e, flashcard.spanishSentence || flashcard.frenchSentence || '', studyTargetLanguage === 'french' ? 'fr-FR' : 'es-ES')}
+                             onClick={(e) => handlePronunciation(e, targetSentence || '', targetLang)}
                              className="p-1 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
-                             aria-label={`Pronounce ${studyTargetLanguage === 'french' ? 'French sentence' : 'Spanish sentence'}`}
+                             aria-label={`Pronounce ${targetLangName} sentence`}
                            >
                              <Volume2 size={20} />
                            </button>
@@ -148,7 +152,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
                      <Volume2 size={20} />
                    </button>
                  </div>
-                 {(flashcard.englishSentence) && (
+                 {flashcard.englishSentence && (
                    <div className="flex items-center justify-center mb-2 break-words">
                      <p className="text-neutral-600 dark:text-neutral-300 italic mr-2">{flashcard.englishSentence}</p>
                      <button
@@ -177,7 +181,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
           {/* Tap Hint */}
           <div className="mt-auto text-center pt-4 border-t border-neutral-100 dark:border-neutral-700">
             <div className="text-sm text-neutral-500 dark:text-neutral-400">
-               Tap to see {isFlipped ? (studyTargetLanguage === 'french' ? 'English meaning' : 'English word') : (studyTargetLanguage === 'french' ? 'French translation' : 'Spanish translation')}
+               Tap to see {isFlipped ? 'English word' : 'Spanish translation'}
             </div>
           </div>
 

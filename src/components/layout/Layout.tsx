@@ -15,7 +15,7 @@ const Layout: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col">
+    <div className="min-h-screen bg-cream-100 dark:bg-neutral-900 flex flex-col">
       <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
       
       <div className="flex flex-1 relative">

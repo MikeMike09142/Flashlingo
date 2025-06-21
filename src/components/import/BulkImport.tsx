@@ -4,7 +4,7 @@ import { Flashcard, LanguageLevel, Category } from '../../types';
 import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
 
 const BulkImport: React.FC = () => {
-  const { addFlashcard, creationTargetLanguage, categories } = useAppContext();
+  const { addFlashcard, creationTargetLanguage, categories, studyTargetLanguage } = useAppContext();
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,7 +152,7 @@ const BulkImport: React.FC = () => {
           className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg cursor-pointer hover:bg-primary-700 transition-colors"
         >
           <Upload size={20} />
-          <span>Seleccionar archivo</span>
+          <span>{studyTargetLanguage === 'french' ? 'Select file' : 'Seleccionar archivo'}</span>
         </label>
         {file && (
           <span className="text-sm text-neutral-600 dark:text-neutral-300">
@@ -189,7 +189,7 @@ const BulkImport: React.FC = () => {
           onClick={handleImport}
           className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
-          Importar Flashcards
+          {studyTargetLanguage === 'french' ? 'Import Flashcards' : 'Importar Flashcards'}
         </button>
       )}
 

@@ -11,7 +11,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
   const location = useLocation();
-  const { categories, activeCategory, setActiveCategory, deleteCategory, addCategory, availableIcons } = useAppContext();
+  const { categories, activeCategory, setActiveCategory, deleteCategory, addCategory, availableIcons, isGuest } = useAppContext();
   
   const iconMap: { [key: string]: React.ComponentType<LucideIcons.LucideProps> } = {
     book: LucideIcons.BookOpen,
@@ -24,19 +24,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
     film: LucideIcons.Film,
   };
 
-  const renderIcon = (iconValue: string) => {
+  const renderIcon = (iconValue: string | undefined) => {
+    if (!iconValue) return <BookOpen size={20} />; // Fallback icon
     const IconComponent = iconMap[iconValue.toLowerCase()];
     if (IconComponent) {
       return <IconComponent size={20} />;
     }
-
-    // Check if it's an available icon by name
-    if (availableIcons.some(icon => icon.value === iconValue.toLowerCase())) {
-       // If it's a custom icon name but not in iconMap, maybe render a default?
-       // For now, we'll render the text value, which is handled below
-    }
-
-    return <span className="text-xl leading-none">{iconValue}</span>; // Render text/emoji if not a Lucide icon
+    return <span className="text-xl leading-none">{iconValue}</span>;
   };
 
   const handleCategoryClick = (categoryId: string | null) => {
@@ -56,7 +50,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
     { path: '/', label: 'Home', icon: <Home size={20} /> },
     { path: '/study', label: 'Study Cards', icon: <BookOpen size={20} /> },
     { path: '/favorites', label: 'Favorites', icon: <Star size={20} /> },
-    { path: '/learned', label: 'Learned', icon: <Check size={20} /> },
     { path: '/stats', label: 'Statistics', icon: <BarChart size={20} /> },
     { path: '/settings', label: 'Settings', icon: <Sliders size={20} /> },
   ];
@@ -78,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
 
   const handleCreateCategory = () => {
     if (newCategoryName.trim()) {
-      addCategory({ name: newCategoryName.trim(), icon: 'book', color: 'primary' }); // Use default icon/color for now
+      addCategory({ name: newCategoryName.trim(), color: 'primary', icon: 'book' });
       setNewCategoryName('');
       setIsAddingCategory(false);
     }
@@ -136,7 +129,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
             <div className="mt-6">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-medium text-neutral-500 dark:text-neutral-400 text-sm uppercase tracking-wider">Categories</h3>
-                 {!isAddingCategory && (
+                 {!isGuest && !isAddingCategory && (
                    <button
                      onClick={handleAddCategoryClick}
                      className="p-1.5 text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
@@ -147,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
                  )}
               </div>
               
-              {isAddingCategory && (
+              {!isGuest && isAddingCategory && (
                  <div className="flex items-center space-x-2 mb-2">
                     <input
                        type="text"
@@ -194,7 +187,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
                     All Categories
                   </button>
                 </li>
-                {categories.map((category) => (
+                {categories && categories.map((category) => (
                   <li key={category.id}>
                     <div className="flex items-center">
                       <button
@@ -205,12 +198,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
                         }`}
                         onClick={() => handleCategoryClick(category.id)}
                       >
-                        <span className="mr-3 text-neutral-500 dark:text-neutral-400">{renderIcon(category.icon)}</span>
+                        <span className="mr-3 text-neutral-500 dark:text-neutral-400"><BookOpen size={20} /></span>
                         {category.name}
                       </button>
                       <button
                         onClick={(e) => handleDeleteCategory(e, category.id)}
-                        className="p-1.5 text-neutral-500 hover:text-error-600 hover:bg-error-50 rounded-full transition-colors duration-200 ml-1"
+                        className="p-1.5 text-error-600 hover:bg-error-50 rounded-full transition-colors duration-200"
                         aria-label="Delete category"
                       >
                         <Trash2 size={16} />

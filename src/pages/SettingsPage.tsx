@@ -1,84 +1,83 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { AlertTriangle } from 'lucide-react';
 import BulkImport from '../components/import/BulkImport';
 
 const SettingsPage: React.FC = () => {
   const { 
-    studyTargetLanguage, 
-    setStudyTargetLanguage,
-    setCreationTargetLanguage,
     theme,
+    studyTargetLanguage,
+    setStudyTargetLanguage,
     updateStudyTimerSettings,
-    updateCardChangeSound
+    updateCardChangeSound,
   } = useAppContext();
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
-  
-  const handleLanguageChange = (language: 'spanish' | 'french') => {
-    setStudyTargetLanguage(language);
-    setCreationTargetLanguage(language);
-  };
 
   const handleTimerDurationChange = (duration: number) => {
     updateStudyTimerSettings(theme.studyTimerEnabled, duration);
+    localStorage.setItem('studyTimerDuration', duration.toString());
   };
 
   const handleTimerEnabledChange = (enabled: boolean) => {
     updateStudyTimerSettings(enabled, theme.studyTimerDuration);
+    localStorage.setItem('studyTimerEnabled', enabled ? 'true' : 'false');
   };
 
   const handleCardChangeSoundChange = (enabled: boolean) => {
     updateCardChangeSound(enabled);
+    localStorage.setItem('cardChangeSoundEnabled', enabled ? 'true' : 'false');
   };
-  
+
+  const handleLanguageChange = (language: 'spanish' | 'french') => {
+    console.log('[SettingsPage] handleLanguageChange called with:', language);
+    setStudyTargetLanguage(language);
+  };
+
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-neutral-800">Settings</h1>
-        <p className="text-neutral-600">Manage your preferences and data</p>
+        <h1 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">Settings</h1>
+        <p className="text-neutral-600 dark:text-neutral-300">Manage your preferences and data</p>
       </div>
       
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-neutral-100">
-          <h2 className="text-lg font-semibold text-neutral-800">Data</h2>
+      <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
+          <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">Data</h2>
           
-          <div className="space-y-6">
-            {/* Bulk Import Section */}
+          <div className="space-y-6 mt-4">
             <div>
-              <h3 className="font-medium text-neutral-700 dark:text-neutral-200 mb-2">Importar Flashcards</h3>
+              <h3 className="font-medium text-neutral-700 dark:text-neutral-200 mb-2">Import Flashcards</h3>
               <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
-                Importa múltiples flashcards desde un archivo CSV o JSON.
+                Import multiple flashcards from a CSV or JSON file.
               </p>
               <BulkImport />
             </div>
 
-            {/* Language Settings Section */}
             <div>
-              <h3 className="font-medium text-neutral-700 mb-2">Language Settings</h3>
-              
-              <div className="space-y-4 mt-4">
+              <h3 className="font-medium text-neutral-700 dark:text-neutral-200 mb-2">Study Language</h3>
+              <div className="space-y-4 mt-2">
                 <div>
-                  <label htmlFor="language" className="block text-sm font-medium text-neutral-700 mb-1">
-                    Target Language
+                  <label htmlFor="studyLanguage" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                    Target Language for Study
                   </label>
                   <select
-                    id="language"
+                    id="studyLanguage"
                     value={studyTargetLanguage}
                     onChange={(e) => handleLanguageChange(e.target.value as 'spanish' | 'french')}
                     className="bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
-                    <option value="spanish">English</option>
+                    <option value="spanish">Spanish</option>
                     <option value="french">French</option>
                   </select>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                    Choose which language you want to study. This affects the translations shown during study sessions.
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Study Timer Settings Section */}
             <div>
-              <h3 className="font-medium text-neutral-700 mb-2">Study Timer Settings</h3>
+              <h3 className="font-medium text-neutral-700 dark:text-neutral-200 mb-2">Study Timer Settings</h3>
               
-              <div className="space-y-4 mt-4">
+              <div className="space-y-4 mt-2">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -87,14 +86,14 @@ const SettingsPage: React.FC = () => {
                     onChange={(e) => handleTimerEnabledChange(e.target.checked)}
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
                   />
-                  <label htmlFor="timerEnabled" className="text-sm font-medium text-neutral-700">
+                  <label htmlFor="timerEnabled" className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Enable Study Timer
                   </label>
                 </div>
 
                 {theme.studyTimerEnabled && (
                   <div>
-                    <label htmlFor="timerDuration" className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label htmlFor="timerDuration" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                       Timer Duration (seconds)
                     </label>
                     <input
@@ -111,11 +110,10 @@ const SettingsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Sound Settings Section */}
             <div>
-              <h3 className="font-medium text-neutral-700 mb-2">Sound Settings</h3>
+              <h3 className="font-medium text-neutral-700 dark:text-neutral-200 mb-2">Sound Settings</h3>
               
-              <div className="space-y-4 mt-4">
+              <div className="space-y-4 mt-2">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -124,7 +122,7 @@ const SettingsPage: React.FC = () => {
                     onChange={(e) => handleCardChangeSoundChange(e.target.checked)}
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
                   />
-                  <label htmlFor="cardChangeSound" className="text-sm font-medium text-neutral-700">
+                  <label htmlFor="cardChangeSound" className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Enable Card Change Sound
                   </label>
                 </div>
@@ -132,31 +130,26 @@ const SettingsPage: React.FC = () => {
             </div>
             
             <div>
-              <h3 className="font-medium text-neutral-700 mb-2">Local Storage</h3>
-              <p className="text-sm text-neutral-500 mb-2">
-                FlashLingo saves all your data in your browser's local storage.
+              <h3 className="font-medium text-neutral-700 dark:text-neutral-200 mb-2">Local Storage</h3>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-2">
+                All your data (flashcards, categories, and progress) is saved automatically in your browser's local storage.
               </p>
-              <p className="text-sm text-neutral-500 mb-4">
-                Clearing your browser data or using private browsing will make your data inaccessible.
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
+                If you clear your browser data, all your progress will be lost.
               </p>
             </div>
           </div>
         </div>
         
         <div className="p-6">
-          <h2 className="text-lg font-semibold text-neutral-800 mb-4">About FlashLingo</h2>
+          <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100 mb-4">About FlashLingo</h2>
           
           <div className="space-y-4">
-            <p className="text-sm text-neutral-600">
-              FlashLingo is a modern flashcard application designed to help you learn English vocabulary 
-              with Spanish translations.
+            <p className="text-sm text-neutral-600 dark:text-neutral-300">
+              FlashLingo is a modern flashcard application designed to help you learn vocabulary with spaced repetition.
             </p>
-            <p className="text-sm text-neutral-600">
-              Features include spaced repetition for optimized learning, natural pronunciation, 
-              categories for organization, and progress tracking.
-            </p>
-            <p className="text-sm text-neutral-600">
-              Version 1.0.0
+            <p className="text-sm text-neutral-600 dark:text-neutral-300">
+              Version 1.1.0 (Local Only)
             </p>
           </div>
         </div>

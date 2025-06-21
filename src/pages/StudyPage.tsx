@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAppContext } from '../context/AppContext';
 import StudyCard from '../components/study/StudyCard';
+import ProductionCard from '../components/study/ProductionCard';
 import EmptyState from '../components/ui/EmptyState';
-import { Check, BookOpen } from 'lucide-react';
+import { Check, BookOpen, Lock, Zap, Mic } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Flashcard, StudyModeOption } from '../types';
 
@@ -14,252 +15,317 @@ const playSound = (soundFileName: string) => {
     console.log('Audio object created for:', `/${soundFileName}`); // Log después de crear el objeto
     audio.volume = 0.3; // Reducir volumen al 50%
     console.log('Audio volume set to:', audio.volume);
-    audio.play().then(() => {
-      console.log('Sound playback started successfully.'); // Log si play() tiene éxito
-    }).catch(error => {
-      console.error('Error playing sound:', soundFileName, error); // Log si play() falla
+    // Prevent overlapping play/pause
+    if (!audio.paused) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+    audio.play().catch((e) => {
+      // Ignore AbortError
+      if (e.name !== 'AbortError') {
+        console.error('Error playing sound:', soundFileName, e);
+      }
     });
   } catch (error) {
     console.error('Error creating audio object or other sync error:', error); // Log si falla al crear el objeto Audio
   }
 };
 
+const SESSION_COMPLETE_KEY = 'studySessionComplete';
+
+const LEVEL_OPTIONS = [
+  { value: '', label: 'All Levels' },
+  { value: 'A1', label: 'A1 BASIC' },
+  { value: 'A2', label: 'A2 BASIC' },
+];
+
+const LEVEL_MAP: Record<string, string> = {
+  'beginner': 'beginner',
+};
+
+const StudyLevelSelector: React.FC<{ onSelectLevel: (level: number) => void }> = ({ onSelectLevel }) => {
+  const { flashcards } = useAppContext();
+
+  const levelCounts = useMemo(() => {
+    const counts: { [key: number]: number } = { 1: 0, 2: 0, 3: 0 };
+    flashcards.forEach(card => {
+      const level = card.studyProgress?.level || 1;
+      if (counts[level] !== undefined) {
+        counts[level]++;
+      }
+    });
+    return counts;
+  }, [flashcards]);
+
+  const allLevel1Done = levelCounts[1] === 0;
+  const allLevel2Done = allLevel1Done && levelCounts[2] === 0;
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold">Elige un Nivel de Dificultad</h2>
+      <button onClick={() => onSelectLevel(1)} className="w-full text-left p-4 border rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
+        <h3 className="font-semibold">Nivel 1: Aprendizaje Guiado</h3>
+        <p className="text-sm text-neutral-500">Imagen + Palabra + Audio. Ideal para empezar.</p>
+        <span className="text-xs">{levelCounts[1]} tarjetas disponibles</span>
+      </button>
+      <button onClick={() => onSelectLevel(2)} disabled={!allLevel1Done} className="w-full text-left p-4 border rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+        <h3 className="font-semibold flex items-center">{!allLevel1Done && <Lock className="mr-2 h-4 w-4" />}Nivel 2: Reconocimiento</h3>
+        <p className="text-sm text-neutral-500">Practica con solo imagen o solo audio.</p>
+        <span className="text-xs">{levelCounts[2]} tarjetas disponibles</span>
+      </button>
+      <button onClick={() => onSelectLevel(3)} disabled={!allLevel2Done} className="w-full text-left p-4 border rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+        <h3 className="font-semibold flex items-center">{!allLevel2Done && <Lock className="mr-2 h-4 w-4" />}Nivel 3: Producción Activa</h3>
+        <p className="text-sm text-neutral-500">Usa tu voz para nombrar lo que ves o escuchas.</p>
+        <span className="text-xs">{levelCounts[3]} tarjetas disponibles</span>
+      </button>
+    </div>
+  );
+};
+
+const CompletionScreen: React.FC<{
+  completedLevel: number;
+  onNextLevel: (level: number) => void;
+  onReset: () => void;
+  onStudyAgain: (level: number) => void;
+}> = ({ completedLevel, onNextLevel, onReset, onStudyAgain }) => {
+  const { flashcards } = useAppContext();
+
+  const nextLevel = completedLevel + 1;
+
+  const isNextLevelUnlocked = useMemo(() => {
+    if (completedLevel >= 3) return false;
+    const cardsInCompletedLevel = flashcards.filter(c => (c.studyProgress?.level || 1) === completedLevel).length;
+    return cardsInCompletedLevel === 0;
+  }, [flashcards, completedLevel]);
+
+  return (
+    <div className="p-4 text-center flex flex-col items-center justify-center h-full">
+      <h2 className="text-3xl font-bold text-green-500 mb-4">¡Nivel {completedLevel} Completado!</h2>
+      <p className="text-neutral-400 max-w-md mx-auto mb-8">
+        ¡Felicidades! Has dominado todas las tarjetas de este nivel. Estás un paso más cerca de tus metas de aprendizaje.
+      </p>
+      
+      <div className="w-full max-w-sm space-y-4">
+        {nextLevel <= 3 && isNextLevelUnlocked && (
+          <button
+            onClick={() => onNextLevel(nextLevel)}
+            className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105"
+          >
+            Empezar Nivel {nextLevel}
+          </button>
+        )}
+        <button
+          onClick={() => onStudyAgain(completedLevel)}
+          className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105"
+        >
+          Estudiar Nivel {completedLevel} de Nuevo
+        </button>
+        <button
+          onClick={onReset}
+          className="w-full bg-primary-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-primary-700 transition-transform transform hover:scale-105"
+        >
+          Volver a la Selección de Niveles
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const StudyPage: React.FC = () => {
-  const { filteredFlashcards, studyTargetLanguage, theme, studyMode, setStudyMode } = useAppContext();
+  const { flashcards, updateFlashcard, setStudyMode, studyMode } = useAppContext();
+  const [selectedStudyLevel, setSelectedStudyLevel] = useState<number | null>(null);
+  const [recognitionMode, setRecognitionMode] = useState<'image_only' | 'audio_only' | null>(null);
+
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [sessionCards, setSessionCards] = useState<Flashcard[]>([]);
   const [studyComplete, setStudyComplete] = useState(false);
-  const nextRoundDontKnowCards = useRef<Flashcard[]>([]);
-  const [currentRoundCards, setCurrentRoundCards] = useState<Flashcard[]>([]);
-  const [isReviewSession, setIsReviewSession] = useState(false);
-  const [totalInitialCards, setTotalInitialCards] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(10); // Estado para el tiempo restante
-  const timerRef = useRef<NodeJS.Timeout | null>(null); // Referencia para el ID del temporizador
+  const reviewPileRef = useRef<Set<string>>(new Set());
+  const [isReviewRound, setIsReviewRound] = useState(false);
+  
+  // Usamos una ref para tener la versión más actualizada de las flashcards sin causar un re-render del useEffect
+  const flashcardsRef = useRef(flashcards);
+  useEffect(() => {
+    flashcardsRef.current = flashcards;
+  }, [flashcards]);
 
-  // Definición de funciones de manejo de tarjetas y navegación
-  const moveToNextCard = useCallback(() => {
-    // Reproducir sonido solo si está habilitado
-    if (theme.cardChangeSoundEnabled) {
-      playSound('playSound.mp3');
+  const initializeSession = useCallback((level: number) => {
+    if (level === 2 && !recognitionMode) {
+        setSessionCards([]);
+        return;
     }
+    
+    const currentFlashcards = flashcardsRef.current;
+    const filtered = currentFlashcards.filter(c => (c.studyProgress?.level || 1) === level);
+    
+    setSessionCards(filtered.sort(() => Math.random() - 0.5));
+    setCurrentCardIndex(0);
+    setStudyComplete(false);
+    reviewPileRef.current.clear();
+    setIsReviewRound(false);
 
-    const nextIndex = currentCardIndex + 1;
+    if (level === 1) setStudyMode('audio_image_text');
+    else if (level === 2 && recognitionMode) setStudyMode(recognitionMode);
+    else if (level === 3) setStudyMode('production');
+  }, [recognitionMode, setStudyMode]);
 
-    if (nextIndex < currentRoundCards.length) {
-      setCurrentCardIndex(nextIndex);
+  // Initialize or reinicia la sesión
+  useEffect(() => {
+    if (selectedStudyLevel !== null) {
+      initializeSession(selectedStudyLevel);
     } else {
-      console.log('End of current study round. Cards for next round:', nextRoundDontKnowCards.current);
-      const cardsForNextRound = [...nextRoundDontKnowCards.current];
-      nextRoundDontKnowCards.current = [];
-
-      if (cardsForNextRound.length > 0) {
-        console.log('Starting next review round with', cardsForNextRound.length, 'cards.');
-        setCurrentRoundCards(cardsForNextRound);
-        setCurrentCardIndex(0);
-        setStudyComplete(false);
-        setIsReviewSession(true);
-      } else {
-        console.log('All cards reviewed. Overall study complete.');
-        setStudyComplete(true);
-        setIsReviewSession(true);
-        setCurrentCardIndex(0);
-        setCurrentRoundCards([]);
-      }
+      setSessionCards([]);
     }
-  }, [currentCardIndex, currentRoundCards.length]);
+  }, [selectedStudyLevel, initializeSession]);
 
-  const handleKnow = useCallback(() => {
-     console.log('Card known:', currentRoundCards[currentCardIndex]?.englishWord);
-     // Limpiar el temporizador actual antes de pasar a la siguiente tarjeta
-     if (timerRef.current) {
-       clearInterval(timerRef.current);
-       timerRef.current = null; // Resetear la referencia
-     }
-     moveToNextCard();
-  }, [currentCardIndex, currentRoundCards, moveToNextCard]);
-
-  const handleDontKnow = useCallback(() => {
-     console.log('Card not known:', currentRoundCards[currentCardIndex]?.englishWord);
-     // Limpiar el temporizador actual antes de pasar a la siguiente tarjeta
-     if (timerRef.current) {
-       clearInterval(timerRef.current);
-       timerRef.current = null; // Resetear la referencia
-     }
-     const currentCard = currentRoundCards[currentCardIndex];
-     if (currentCard) {
-       nextRoundDontKnowCards.current.push(currentCard);
-     }
-     moveToNextCard();
-  }, [currentCardIndex, currentRoundCards, moveToNextCard]);
-
-  // Efecto para inicializar la sesión de estudio
-  useEffect(() => {
-    console.log('Initializing study session with filteredFlashcards:', filteredFlashcards);
-    setCurrentRoundCards([...filteredFlashcards]);
-    setTotalInitialCards(filteredFlashcards.length);
-    setCurrentCardIndex(0);
-    setStudyComplete(filteredFlashcards.length === 0);
-    setIsReviewSession(false);
-    nextRoundDontKnowCards.current = [];
-  }, [filteredFlashcards]);
-
-  // Efecto para manejar el temporizador por cada tarjeta
-  useEffect(() => {
-    // Limpiar cualquier temporizador existente
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
+  const handleStudyAgain = (level: number) => {
+    if (level === 2) {
+      // For level 2, we need to show the recognition mode selector again
+      setStudyComplete(false);
+      setRecognitionMode(null);
+      setSelectedStudyLevel(level); // Keep the level selected
+    } else {
+      initializeSession(level);
     }
-
-    // Si el temporizador está habilitado, hay tarjetas y no hemos terminado, iniciar nuevo temporizador
-    if (theme.studyTimerEnabled && !studyComplete && currentRoundCards.length > 0 && currentCardIndex < currentRoundCards.length) {
-      setTimeLeft(theme.studyTimerDuration); // Usar la duración configurada
-
-      timerRef.current = setInterval(() => {
-        setTimeLeft(prevTime => {
-          if (prevTime <= 1) {
-            // Tiempo agotado: marcar como 'No lo sé' y pasar a la siguiente
-            if (timerRef.current) {
-              clearInterval(timerRef.current); // Limpiar temporizador
-            }
-            handleDontKnow(); // Llamar a handleDontKnow
-            return 0; // Establecer tiempo a 0
-          } else {
-            return prevTime - 1; // Decrementar tiempo
-          }
-        });
-      }, 1000); // Intervalo de 1 segundo
-    }
-
-    // Función de limpieza: limpiar el temporizador cuando el componente se desmonte
-    // o cuando las dependencias cambien
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-    // Dependencias del efecto: se re-ejecuta cuando cambia la tarjeta, o las funciones de manejo
-  }, [currentCardIndex, currentRoundCards.length, studyComplete, handleDontKnow, theme.studyTimerEnabled, theme.studyTimerDuration]); // Añadir dependencias del tema
-
-  const restartStudy = () => {
-    console.log('Restarting study session.');
-    setCurrentRoundCards([...filteredFlashcards]);
-    setTotalInitialCards(filteredFlashcards.length);
-    setCurrentCardIndex(0);
-    setStudyComplete(filteredFlashcards.length === 0);
-    setIsReviewSession(false);
-    nextRoundDontKnowCards.current = [];
   };
 
-  const currentCard = !studyComplete && currentRoundCards.length > 0 ? currentRoundCards[currentCardIndex] : undefined;
+  const moveToNextCard = useCallback(() => {
+    if (currentCardIndex < sessionCards.length - 1) {
+      setCurrentCardIndex(prev => prev + 1);
+    } else {
+      const reviewCards = sessionCards.filter(card => reviewPileRef.current.has(card.id));
 
-  const showEmptyState = filteredFlashcards.length === 0 && studyComplete;
-  const showCompleteScreen = studyComplete && filteredFlashcards.length > 0;
+      if (reviewCards.length > 0) {
+        reviewPileRef.current.clear();
+        setSessionCards(reviewCards.sort(() => Math.random() - 0.5));
+        setCurrentCardIndex(0);
+        setIsReviewRound(true);
+      } else {
+        setStudyComplete(true);
+      }
+    }
+  }, [currentCardIndex, sessionCards]);
 
-  if (showEmptyState) {
-     console.log('Rendering EmptyState');
+  const handleKnow = useCallback(() => {
+    const card = sessionCards[currentCardIndex];
+    if (!card) return;
+    
+    reviewPileRef.current.delete(card.id);
+
+    if (selectedStudyLevel === 1) {
+      updateFlashcard(card.id, { studyProgress: { level: 2, consecutiveCorrect: 0 } });
+    } else if (selectedStudyLevel === 2 || selectedStudyLevel === 3) {
+      const progress = card.studyProgress || { level: selectedStudyLevel, consecutiveCorrect: 0 };
+      const newConsecutive = progress.consecutiveCorrect + 1;
+      
+      if (newConsecutive >= 3) {
+        if (selectedStudyLevel === 2) {
+            updateFlashcard(card.id, { studyProgress: { level: 3, consecutiveCorrect: 0 } });
+        } else {
+            // Tarjeta dominada
+            updateFlashcard(card.id, { studyProgress: { level: 4, consecutiveCorrect: 0 } });
+        }
+      } else {
+        updateFlashcard(card.id, { studyProgress: { ...progress, consecutiveCorrect: newConsecutive } });
+      }
+    }
+    moveToNextCard();
+  }, [currentCardIndex, sessionCards, selectedStudyLevel, updateFlashcard, moveToNextCard]);
+
+  const handleDontKnow = useCallback(() => {
+    const card = sessionCards[currentCardIndex];
+    if (!card) return;
+
+    reviewPileRef.current.add(card.id);
+
+    if (selectedStudyLevel === 2) {
+      updateFlashcard(card.id, { studyProgress: { ...card.studyProgress, level: 2, consecutiveCorrect: 0 } });
+    }
+    moveToNextCard();
+  }, [currentCardIndex, sessionCards, selectedStudyLevel, updateFlashcard, moveToNextCard]);
+
+  const resetSession = () => {
+    setSelectedStudyLevel(null);
+    setRecognitionMode(null);
+    setStudyMode('audio_image_text');
+  };
+
+  const currentCard = sessionCards[currentCardIndex];
+
+  // Render principal del componente
+  if (!selectedStudyLevel) {
     return (
-      <EmptyState
-        title="No Cards to Study"
-        description="You have no cards to review at the moment based on current filters. Try adjusting your filters or add new cards."
-        icon={<BookOpen size={24} className="text-neutral-400" />}
-        actionText="Add New Card"
-        actionLink="/create"
-      />
-    );
-  }
-
-  if (showCompleteScreen) {
-     console.log('Rendering Study Complete Screen');
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center max-w-md mx-auto">
-        <div className="w-20 h-20 bg-success-50 rounded-full flex items-center justify-center mb-6">
-          <Check size={36} className="text-success-500" />
-        </div>
-        <h2 className="text-2xl font-bold text-neutral-800 mb-2 dark:text-neutral-100">Study Session Complete!</h2>
-        <p className="text-neutral-600 mb-6 dark:text-neutral-300">
-          You've reviewed all your cards based on the current filters.
-        </p>
-        <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm p-6 w-full mb-8">
-          <div className="grid grid-cols-1 gap-4">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-primary-600">{totalInitialCards}</p>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">Total Cards in Session (initial)</p>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button
-            onClick={restartStudy}
-            className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
-          >
-            Study Again (with current filters)
-          </button>
-          <Link
-            to="/"
-            className="px-6 py-3 bg-white border border-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors duration-200 dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-600"
-          >
-            Return to Dashboard
-          </Link>
-        </div>
+      <div className="p-4">
+        <StudyLevelSelector onSelectLevel={setSelectedStudyLevel} />
       </div>
     );
   }
 
-  if (currentCard) {
-      console.log('Rendering StudyCard for:', currentCard.englishWord, 'Index:', currentCardIndex, 'Total in round:', currentRoundCards.length);
-     return (
-       <div className="py-4">
-         <div className="mb-6">
-           <h1 className="text-2xl font-bold text-neutral-800">Study Session</h1>
-           <p className="text-neutral-600">Review your flashcards to improve retention</p>
-            {isReviewSession && (
-                <p className="text-orange-600 dark:text-orange-400 font-medium mt-1">Reviewing cards you didn't know</p>
-            )}
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Studying in: {studyTargetLanguage === 'spanish' ? 'Español' : 'Français'}</p>
-
-            {/* Control para el modo de estudio */}
-            <div className="flex items-center mt-2">
-              <label htmlFor="studyModeSelect" className="ml-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 mr-2">
-                Modo de Estudio:
-              </label>
-              <select
-                id="studyModeSelect"
-                value={studyMode}
-                onChange={(e) => {
-                  const selectedMode = e.target.value as StudyModeOption;
-                  console.log('Changing study mode to:', selectedMode);
-                  setStudyMode(selectedMode);
-                }}
-                className="bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-200 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-              >
-                <option value="audio_image_text">Audio + Imagen + Palabras</option>
-                <option value="audio_image">Audio + Imagen</option>
-                <option value="audio_only">Solo Audio</option>
-                <option value="image_only">Solo Imagen</option>
-              </select>
-            </div>
-
-         </div>
-         <StudyCard
-           flashcard={currentCard}
-           onKnow={handleKnow}
-           onDontKnow={handleDontKnow}
-         />
-          {/* Mostrar el tiempo restante solo si el temporizador está habilitado */}
-         {theme.studyTimerEnabled && (
-           <div className="mt-4 text-center text-lg font-semibold text-primary-600 dark:text-primary-400">
-               Tiempo restante: {timeLeft}s
-           </div>
-         )}
-
-          <div className="mt-8 text-center text-neutral-600 dark:text-neutral-300">
-              Card {currentCardIndex + 1} of {currentRoundCards.length} {isReviewSession && '(Review Round)'}
-          </div>
-       </div>
-     );
+  if (selectedStudyLevel === 2 && !recognitionMode) {
+    return (
+      <div className="p-4">
+        <button onClick={resetSession} className="mb-4">&larr; Volver a niveles</button>
+        <h2 className="text-xl font-bold mb-4">Nivel 2: Reconocimiento</h2>
+        <p className="mb-4">Elige cómo quieres practicar.</p>
+        <div className="space-y-4">
+          <button onClick={() => setRecognitionMode('image_only')} className="w-full text-left p-4 border rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
+            <h3 className="font-semibold">Solo Imagen</h3>
+            <p className="text-sm text-neutral-500">Se te mostrará una imagen y deberás reconocer la palabra.</p>
+          </button>
+          <button onClick={() => setRecognitionMode('audio_only')} className="w-full text-left p-4 border rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
+            <h3 className="font-semibold">Solo Audio</h3>
+            <p className="text-sm text-neutral-500">Escucharás el audio y deberás reconocer la palabra.</p>
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  if (studyComplete || (selectedStudyLevel && sessionCards.length === 0 && !isReviewRound)) {
+    return (
+      <CompletionScreen
+        completedLevel={selectedStudyLevel!}
+        onNextLevel={(level) => {
+          setRecognitionMode(null);
+          setSelectedStudyLevel(level);
+        }}
+        onReset={resetSession}
+        onStudyAgain={handleStudyAgain}
+      />
+    );
   }
 
-   console.log('Rendering null - unexpected state or waiting for useEffect.', {studyComplete, currentCard: !!currentCard, hasInitialStudyCards: filteredFlashcards.length > 0, isReviewSession, studyCardsLength: currentRoundCards.length, nextRoundDontKnowCardsLength: nextRoundDontKnowCards.current.length, totalInitialCards});
-  return null;
+  return (
+    <div className="py-4">
+      <div className="mb-6 px-4">
+        <button onClick={resetSession} className="mb-4 text-sm text-primary-600 dark:text-primary-400">&larr; Cambiar de nivel</button>
+        <h1 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">Sesión de Estudio - Nivel {selectedStudyLevel}</h1>
+        <p className="text-neutral-600 dark:text-neutral-300">
+          {selectedStudyLevel === 1 && 'Aprendizaje Guiado: familiarízate con las tarjetas.'}
+          {selectedStudyLevel === 2 && `Reconocimiento: modo ${recognitionMode === 'image_only' ? 'Solo Imagen' : 'Solo Audio'}.`}
+          {selectedStudyLevel === 3 && 'Producción Activa: di la palabra en voz alta.'}
+        </p>
+        {isReviewRound && <p className="text-orange-400 font-semibold mt-1">Repasando las tarjetas que no sabías...</p>}
+      </div>
+      <div className="mb-4 text-center text-sm text-neutral-500">
+        Tarjeta {currentCardIndex + 1} de {sessionCards.length}
+      </div>
+      {currentCard && (
+        selectedStudyLevel === 3 ? (
+          <ProductionCard
+            flashcard={currentCard}
+            onKnow={handleKnow}
+            onDontKnow={handleDontKnow}
+          />
+        ) : (
+          <StudyCard
+            flashcard={currentCard}
+            onKnow={handleKnow}
+            onDontKnow={handleDontKnow}
+          />
+        )
+      )}
+    </div>
+  );
 };
 
 export default StudyPage;

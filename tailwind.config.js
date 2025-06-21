@@ -5,6 +5,19 @@ export default {
   theme: {
     extend: {
       colors: {
+        cream: {
+          50: '#fefefe',
+          100: '#fdfcf9',
+          200: '#faf8f2',
+          300: '#f6f2e8',
+          400: '#f0ead8',
+          500: '#e8dfc3',
+          600: '#d4c69a',
+          700: '#b8a572',
+          800: '#9a8559',
+          900: '#7d6d4a',
+          950: '#433a28',
+        },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',
