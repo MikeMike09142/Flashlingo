@@ -59,7 +59,12 @@ const HomePage: React.FC = () => {
           const importedFlashcards = JSON.parse(e.target?.result as string) as Flashcard[];
           // Basic validation
           if (Array.isArray(importedFlashcards) && importedFlashcards.every(card => 'id' in card && 'englishWord' in card)) {
-            setFlashcards(importedFlashcards);
+            setFlashcards((prev: Flashcard[]) => {
+              const newOnes = importedFlashcards.filter(
+                imported => !prev.some((existing: Flashcard) => existing.id === imported.id)
+              );
+              return [...prev, ...newOnes];
+            });
             alert('Flashcards imported successfully!');
           } else {
             throw new Error('Invalid file format.');

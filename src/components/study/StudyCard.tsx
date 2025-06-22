@@ -1,9 +1,11 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Flashcard } from '../../types/index';
 import { Volume2, ArrowRight } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
+import ImageWithFallback from '../ui/ImageWithFallback';
 
 interface StudyCardProps {
   flashcard: Flashcard;
@@ -93,8 +95,8 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   }, [flashcard.spanishSentence, flashcard.frenchSentence, studyTargetLanguage]);
 
   const categoriesList = (flashcard.categoryIds ?? [])
-    .map(id => categories.find(cat => cat.id === id))
-    .filter(cat => cat !== undefined);
+    .map((id: string) => categories.find((cat: any) => cat.id === id))
+    .filter((cat: any) => cat !== undefined);
 
   // Get target language content
   const targetTranslation = studyTargetLanguage === 'french' ? flashcard.frenchTranslation : flashcard.spanishTranslation;
@@ -117,7 +119,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
           {/* Front side */}
           <div className="w-full h-full flex flex-col justify-between">
             <div className="flex justify-end space-x-2">
-              {categoriesList.map((category) => (
+              {categoriesList.map((category: any) => (
                 <span
                   key={category!.id}
                   className="px-2 py-1 text-xs rounded-full text-white"
@@ -130,10 +132,11 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
             
             <div className="flex-1 flex flex-col items-center justify-center">
               {flashcard.imageUrl && (
-                <img
+                <ImageWithFallback
                   src={flashcard.imageUrl}
                   alt="Flashcard"
                   className="max-h-48 mb-4 rounded-lg object-cover"
+                  fallbackText="Imagen no disponible"
                 />
               )}
               
@@ -156,7 +159,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
         </div>
       </animated.div>
     </div>
-  );
+  )
 
   return (
     <div className="max-w-2xl mx-auto relative pb-20">
@@ -173,7 +176,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
           {/* Back side */}
           <div className="w-full h-full flex flex-col justify-between">
             <div className="flex justify-end space-x-2">
-              {categoriesList.map((category) => (
+              {categoriesList.map((category: any) => (
                 <span
                   key={category!.id}
                   className="px-2 py-1 text-xs rounded-full text-white"

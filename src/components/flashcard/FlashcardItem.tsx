@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import { Star, StarOff, Volume2, Pencil, Trash2 } from 'lucide-react';
 import { Flashcard as FlashcardType, Category } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import ImageWithFallback from '../ui/ImageWithFallback';
 
 interface FlashcardItemProps {
   flashcard: FlashcardType;
@@ -10,8 +11,8 @@ interface FlashcardItemProps {
 }
 
 const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
-  const { toggleFavorite, deleteFlashcard, categories, getCategoryById, studyTargetLanguage } = useAppContext();
+  const [isFlipped, setIsFlipped] = React.useState(false);
+  const { toggleFavorite, deleteFlashcard, categories, studyTargetLanguage } = useAppContext();
   const navigate = useNavigate();
   
   const handleFlip = () => {
@@ -47,8 +48,8 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
       return [];
     }
     return flashcard.categoryIds
-      .map(id => categories.find(cat => cat.id === id))
-      .filter((cat): cat is Category => cat !== undefined);
+      .map((id: string) => categories.find((cat: Category) => cat.id === id))
+      .filter((cat: Category | undefined): cat is Category => cat !== undefined);
   };
   
   const categoriesList = getCategories();
@@ -168,11 +169,11 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
             )}
              {flashcard.imageUrl && (
               <div className="mt-4 rounded-lg overflow-hidden w-full max-h-40">
-                <img 
+                <ImageWithFallback 
                   src={flashcard.imageUrl} 
                   alt={flashcard.englishWord} 
                   className="w-full h-full object-cover"
-                  loading="lazy"
+                  fallbackText="Imagen no disponible"
                 />
               </div>
             )}
