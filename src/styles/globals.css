@@ -31,7 +31,7 @@
   
   /* Improve touch responsiveness */
   .swipe-card {
-    touch-action: pan-y pinch-zoom;
+    touch-action: none !important; /* Critical for gesture recognition */
     will-change: transform;
   }
   
@@ -51,4 +51,14 @@
   body {
     overflow-x: hidden;
   }
+}
+
+/* Critical touch-action for swipe gestures */
+.swipe-card {
+  touch-action: none !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 } 

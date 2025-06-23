@@ -90,7 +90,7 @@ const SwipeTest: React.FC = () => {
       <div className="max-w-md mx-auto relative">
         <animated.div
           {...bind()}
-          style={{ x, rotate, scale }}
+          style={{ x, rotate, scale, touchAction: 'none' }}
           className="bg-blue-500 text-white p-8 rounded-xl shadow-lg cursor-grab active:cursor-grabbing"
         >
           <h3 className="text-lg font-bold mb-2">Test Card</h3>

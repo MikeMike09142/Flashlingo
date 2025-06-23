@@ -200,7 +200,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
       
       <animated.div
         {...bind()}
-        style={{ x, rotate, scale }}
+        style={{ x, rotate, scale, touchAction: 'none' }}
         className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 ${
           swipeDirection === 'right' 
             ? 'bg-green-50 dark:bg-green-900/20' 
@@ -283,7 +283,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
       
       <animated.div
         {...bind()}
-        style={{ x, rotate, scale }}
+        style={{ x, rotate, scale, touchAction: 'none' }}
         className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 ${
           swipeDirection === 'right' 
             ? 'bg-green-50 dark:bg-green-900/20' 
