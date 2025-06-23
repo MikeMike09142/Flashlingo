@@ -18,10 +18,10 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   const { categories, studyMode, studyTargetLanguage } = useAppContext();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [swipeDirection, setSwipeDirection] = useState<'up' | 'down' | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   
-  const [{ y, rotate, scale }, api] = useSpring(() => ({
-    y: 0,
+  const [{ x, rotate, scale }, api] = useSpring(() => ({
+    x: 0,
     rotate: 0,
     scale: 1,
     config: { tension: 300, friction: 30 },
@@ -32,7 +32,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
     setIsFlipped(false);
     setIsTransitioning(false);
     setSwipeDirection(null);
-    api.start({ y: 0, rotate: 0, scale: 1 });
+    api.start({ x: 0, rotate: 0, scale: 1 });
   }, [flashcard.id, api]);
 
   const handleFlip = useCallback((e?: React.MouseEvent) => {
@@ -41,56 +41,79 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
     setIsFlipped(f => !f);
   }, [isTransitioning]);
 
-  // Vertical swipe gesture for mobile
+  // Horizontal swipe gesture for mobile
   const bind = useDrag(
     ({ down, movement: [mx, my], direction: [xDir, yDir], velocity: [vx, vy] }) => {
-      const trigger = vy > 0.2; // Vertical velocity threshold
-      const horizontalThreshold = Math.abs(mx) < 100; // Prevent horizontal swipes from triggering
+      const trigger = vx > 0.1; // Horizontal velocity threshold
+      const verticalThreshold = Math.abs(my) < 150; // Prevent vertical swipes from triggering
+      const distanceThreshold = Math.abs(mx) > 80; // Distance threshold for easier triggering
       
-      if (!down && trigger && horizontalThreshold) {
-        const dir = yDir < 0 ? -1 : 1; // Up -1 (I know), Down 1 (I don't know)
+      // Multiple ways to trigger the swipe
+      const shouldTrigger = !down && verticalThreshold && (
+        trigger || // Fast swipe with velocity
+        distanceThreshold || // Slow swipe with distance
+        Math.abs(mx) > 120 || // Very slow but long swipe
+        Math.abs(mx) > 60 // Fallback: any significant horizontal movement
+      );
+      
+      // Debug logging
+      if (!down && Math.abs(mx) > 30) {
+        console.log('Swipe Debug:', {
+          velocity: vx,
+          distance: Math.abs(mx),
+          direction: xDir,
+          vertical: Math.abs(my),
+          trigger,
+          distanceThreshold,
+          shouldTrigger,
+          verticalThreshold
+        });
+      }
+      
+      if (shouldTrigger) {
+        const dir = xDir < 0 ? -1 : 1; // Left -1 (I don't know), Right 1 (I know)
         
         // Haptic feedback for mobile devices
         if ('vibrate' in navigator) {
           navigator.vibrate(50);
         }
         
-        if (dir === -1) {
-          // Swipe up - I know
-          setSwipeDirection('up');
+        if (dir === 1) {
+          // Swipe right - I know
+          setSwipeDirection('right');
           onKnow();
           api.start({
-            y: -window.innerHeight,
-            rotate: -20,
+            x: window.innerWidth,
+            rotate: 20,
             scale: 0.8,
             config: { friction: 50, tension: 200 },
           });
         } else {
-          // Swipe down - I don't know
-          setSwipeDirection('down');
+          // Swipe left - I don't know
+          setSwipeDirection('left');
           onDontKnow();
           api.start({
-            y: window.innerHeight,
-            rotate: 20,
+            x: -window.innerWidth,
+            rotate: -20,
             scale: 0.8,
             config: { friction: 50, tension: 200 },
           });
         }
       } else {
         // During drag or reset
-        const yMovement = down ? my : 0;
-        const rotation = down ? my / 20 : 0; // Gentle rotation during drag
-        const scaleValue = down ? 1 - Math.abs(my) / 1000 : 1; // Slight scale effect
+        const xMovement = down ? mx : 0;
+        const rotation = down ? mx / 20 : 0; // Gentle rotation during drag
+        const scaleValue = down ? 1 - Math.abs(mx) / 1000 : 1; // Slight scale effect
         
         // Set swipe direction for visual feedback
-        if (down && Math.abs(my) > 30) {
-          setSwipeDirection(my < 0 ? 'up' : 'down');
+        if (down && Math.abs(mx) > 20) { // Reduced threshold for visual feedback
+          setSwipeDirection(mx < 0 ? 'left' : 'right');
         } else if (!down) {
           setSwipeDirection(null);
         }
         
         api.start({ 
-          y: yMovement, 
+          x: xMovement, 
           rotate: rotation, 
           scale: scaleValue,
           config: { friction: 50, tension: 500 } 
@@ -100,8 +123,10 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
     { 
       filterTaps: true, 
       rubberband: true,
-      bounds: { top: -100, bottom: 100 }, // Limit vertical movement
-      axis: 'y' // Restrict to vertical movement
+      bounds: { left: -300, right: 300 }, // Horizontal bounds
+      axis: 'x', // Restrict to horizontal movement
+      threshold: 10, // Very low threshold for starting the gesture
+      delay: 0 // No delay
     }
   );
 
@@ -155,16 +180,16 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
     <div className="max-w-2xl mx-auto relative pb-20 swipe-container">
       {/* Swipe indicators */}
       <div className="absolute inset-0 pointer-events-none z-10">
-        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
-          swipeDirection === 'up' 
+        <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+          swipeDirection === 'right' 
             ? 'bg-green-600 text-white scale-110 shadow-lg' 
             : 'bg-green-500 text-white'
         }`}>
           <Check size={16} className="mr-1" />
           I Know
         </div>
-        <div className={`absolute bottom-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
-          swipeDirection === 'down' 
+        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+          swipeDirection === 'left' 
             ? 'bg-red-600 text-white scale-110 shadow-lg' 
             : 'bg-red-500 text-white'
         }`}>
@@ -175,11 +200,11 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
       
       <animated.div
         {...bind()}
-        style={{ y, rotate, scale }}
+        style={{ x, rotate, scale }}
         className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 ${
-          swipeDirection === 'up' 
+          swipeDirection === 'right' 
             ? 'bg-green-50 dark:bg-green-900/20' 
-            : swipeDirection === 'down' 
+            : swipeDirection === 'left' 
             ? 'bg-red-50 dark:bg-red-900/20'
             : 'bg-white dark:bg-neutral-800'
         }`}
@@ -225,7 +250,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
             </div>
             
             <div className="text-center text-neutral-500 dark:text-neutral-400">
-              <p>Tap to see translation • Swipe up/down to answer</p>
+              <p>Tap to see translation • Swipe left/right to answer</p>
               <ArrowRight className="mx-auto mt-2" size={20} />
             </div>
           </div>
@@ -238,16 +263,16 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
     <div className="max-w-2xl mx-auto relative pb-20 swipe-container">
       {/* Swipe indicators */}
       <div className="absolute inset-0 pointer-events-none z-10">
-        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
-          swipeDirection === 'up' 
+        <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+          swipeDirection === 'right' 
             ? 'bg-green-600 text-white scale-110 shadow-lg' 
             : 'bg-green-500 text-white'
         }`}>
           <Check size={16} className="mr-1" />
           I Know
         </div>
-        <div className={`absolute bottom-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
-          swipeDirection === 'down' 
+        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+          swipeDirection === 'left' 
             ? 'bg-red-600 text-white scale-110 shadow-lg' 
             : 'bg-red-500 text-white'
         }`}>
@@ -258,11 +283,11 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
       
       <animated.div
         {...bind()}
-        style={{ y, rotate, scale }}
+        style={{ x, rotate, scale }}
         className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 ${
-          swipeDirection === 'up' 
+          swipeDirection === 'right' 
             ? 'bg-green-50 dark:bg-green-900/20' 
-            : swipeDirection === 'down' 
+            : swipeDirection === 'left' 
             ? 'bg-red-50 dark:bg-red-900/20'
             : 'bg-white dark:bg-neutral-800'
         }`}
@@ -311,7 +336,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
             </div>
             
             <div className="text-center text-neutral-500 dark:text-neutral-400">
-              <p>Tap to see English word • Swipe up/down to answer</p>
+              <p>Tap to see English word • Swipe left/right to answer</p>
               <ArrowRight className="mx-auto mt-2" size={20} />
             </div>
           </div>
