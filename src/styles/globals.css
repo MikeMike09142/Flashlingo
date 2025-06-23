@@ -15,4 +15,40 @@
 .dark .btn-reset-progress {
   background-color: #6b1616; /* Tono oscuro de error similar a error-900 */
   color: #fecaca; /* Tono claro de error similar a error-200 */
+}
+
+/* Mobile-specific styles for swipe gestures */
+@media (max-width: 768px) {
+  /* Prevent text selection during swipe */
+  .swipe-container {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Improve touch responsiveness */
+  .swipe-card {
+    touch-action: pan-y pinch-zoom;
+    will-change: transform;
+  }
+  
+  /* Smooth animations for mobile */
+  .swipe-card * {
+    pointer-events: none;
+  }
+  
+  .swipe-card button,
+  .swipe-card [role="button"] {
+    pointer-events: auto;
+  }
+}
+
+/* Prevent horizontal scrolling on mobile */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
 } 

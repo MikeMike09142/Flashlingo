@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useCallback, useEffect } from 'react';
 import { Flashcard } from '../../types/index';
-import { Volume2, ArrowRight } from 'lucide-react';
+import { Volume2, ArrowRight, Check, X } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
@@ -18,10 +18,12 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   const { categories, studyMode, studyTargetLanguage } = useAppContext();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<'up' | 'down' | null>(null);
   
-  const [{ x, rotate }, api] = useSpring(() => ({
-    x: 0,
+  const [{ y, rotate, scale }, api] = useSpring(() => ({
+    y: 0,
     rotate: 0,
+    scale: 1,
     config: { tension: 300, friction: 30 },
   }));
 
@@ -29,7 +31,8 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   useEffect(() => {
     setIsFlipped(false);
     setIsTransitioning(false);
-    api.start({ x: 0, rotate: 0 });
+    setSwipeDirection(null);
+    api.start({ y: 0, rotate: 0, scale: 1 });
   }, [flashcard.id, api]);
 
   const handleFlip = useCallback((e?: React.MouseEvent) => {
@@ -38,24 +41,68 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
     setIsFlipped(f => !f);
   }, [isTransitioning]);
 
+  // Vertical swipe gesture for mobile
   const bind = useDrag(
-    ({ down, movement: [mx], direction: [xDir], velocity: [vx] }) => {
-      const trigger = vx > 0.2;
-      if (!down && trigger) {
-        const dir = xDir < 0 ? -1 : 1; // Izquierda -1, Derecha 1
-        if (dir === 1) onKnow();
-        else onDontKnow();
-
-        api.start({
-          x: (200 + window.innerWidth) * dir,
-          rotate: mx / 100 + (dir * 10 * vx),
-          config: { friction: 50, tension: down ? 800 : trigger ? 200 : 500 },
-        });
+    ({ down, movement: [mx, my], direction: [xDir, yDir], velocity: [vx, vy] }) => {
+      const trigger = vy > 0.2; // Vertical velocity threshold
+      const horizontalThreshold = Math.abs(mx) < 100; // Prevent horizontal swipes from triggering
+      
+      if (!down && trigger && horizontalThreshold) {
+        const dir = yDir < 0 ? -1 : 1; // Up -1 (I know), Down 1 (I don't know)
+        
+        // Haptic feedback for mobile devices
+        if ('vibrate' in navigator) {
+          navigator.vibrate(50);
+        }
+        
+        if (dir === -1) {
+          // Swipe up - I know
+          setSwipeDirection('up');
+          onKnow();
+          api.start({
+            y: -window.innerHeight,
+            rotate: -20,
+            scale: 0.8,
+            config: { friction: 50, tension: 200 },
+          });
+        } else {
+          // Swipe down - I don't know
+          setSwipeDirection('down');
+          onDontKnow();
+          api.start({
+            y: window.innerHeight,
+            rotate: 20,
+            scale: 0.8,
+            config: { friction: 50, tension: 200 },
+          });
+        }
       } else {
-        api.start({ x: down ? mx : 0, rotate: down ? mx / 10 : 0, config: { friction: 50, tension: 500 } });
+        // During drag or reset
+        const yMovement = down ? my : 0;
+        const rotation = down ? my / 20 : 0; // Gentle rotation during drag
+        const scaleValue = down ? 1 - Math.abs(my) / 1000 : 1; // Slight scale effect
+        
+        // Set swipe direction for visual feedback
+        if (down && Math.abs(my) > 30) {
+          setSwipeDirection(my < 0 ? 'up' : 'down');
+        } else if (!down) {
+          setSwipeDirection(null);
+        }
+        
+        api.start({ 
+          y: yMovement, 
+          rotate: rotation, 
+          scale: scaleValue,
+          config: { friction: 50, tension: 500 } 
+        });
       }
     },
-    { filterTaps: true, rubberband: true }
+    { 
+      filterTaps: true, 
+      rubberband: true,
+      bounds: { top: -100, bottom: 100 }, // Limit vertical movement
+      axis: 'y' // Restrict to vertical movement
+    }
   );
 
   const handlePronounceWord = useCallback((e: React.MouseEvent) => {
@@ -105,11 +152,37 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   const targetLangName = studyTargetLanguage === 'french' ? 'French' : 'Spanish';
 
   if (!isFlipped) return (
-    <div className="max-w-2xl mx-auto relative pb-20">
+    <div className="max-w-2xl mx-auto relative pb-20 swipe-container">
+      {/* Swipe indicators */}
+      <div className="absolute inset-0 pointer-events-none z-10">
+        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+          swipeDirection === 'up' 
+            ? 'bg-green-600 text-white scale-110 shadow-lg' 
+            : 'bg-green-500 text-white'
+        }`}>
+          <Check size={16} className="mr-1" />
+          I Know
+        </div>
+        <div className={`absolute bottom-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+          swipeDirection === 'down' 
+            ? 'bg-red-600 text-white scale-110 shadow-lg' 
+            : 'bg-red-500 text-white'
+        }`}>
+          <X size={16} className="mr-1" />
+          I Don't Know
+        </div>
+      </div>
+      
       <animated.div
         {...bind()}
-        style={{ x, rotate }}
-        className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm overflow-hidden"
+        style={{ y, rotate, scale }}
+        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 ${
+          swipeDirection === 'up' 
+            ? 'bg-green-50 dark:bg-green-900/20' 
+            : swipeDirection === 'down' 
+            ? 'bg-red-50 dark:bg-red-900/20'
+            : 'bg-white dark:bg-neutral-800'
+        }`}
         onClick={handleFlip}
         tabIndex={0}
         role="button"
@@ -152,7 +225,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
             </div>
             
             <div className="text-center text-neutral-500 dark:text-neutral-400">
-              <p>Tap to see translation</p>
+              <p>Tap to see translation • Swipe up/down to answer</p>
               <ArrowRight className="mx-auto mt-2" size={20} />
             </div>
           </div>
@@ -162,11 +235,37 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   )
 
   return (
-    <div className="max-w-2xl mx-auto relative pb-20">
+    <div className="max-w-2xl mx-auto relative pb-20 swipe-container">
+      {/* Swipe indicators */}
+      <div className="absolute inset-0 pointer-events-none z-10">
+        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+          swipeDirection === 'up' 
+            ? 'bg-green-600 text-white scale-110 shadow-lg' 
+            : 'bg-green-500 text-white'
+        }`}>
+          <Check size={16} className="mr-1" />
+          I Know
+        </div>
+        <div className={`absolute bottom-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+          swipeDirection === 'down' 
+            ? 'bg-red-600 text-white scale-110 shadow-lg' 
+            : 'bg-red-500 text-white'
+        }`}>
+          <X size={16} className="mr-1" />
+          I Don't Know
+        </div>
+      </div>
+      
       <animated.div
         {...bind()}
-        style={{ x, rotate }}
-        className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm overflow-hidden"
+        style={{ y, rotate, scale }}
+        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 ${
+          swipeDirection === 'up' 
+            ? 'bg-green-50 dark:bg-green-900/20' 
+            : swipeDirection === 'down' 
+            ? 'bg-red-50 dark:bg-red-900/20'
+            : 'bg-white dark:bg-neutral-800'
+        }`}
         onClick={handleFlip}
         tabIndex={0}
         role="button"
@@ -212,7 +311,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
             </div>
             
             <div className="text-center text-neutral-500 dark:text-neutral-400">
-              <p>Tap to see English word</p>
+              <p>Tap to see English word • Swipe up/down to answer</p>
               <ArrowRight className="mx-auto mt-2" size={20} />
             </div>
           </div>
