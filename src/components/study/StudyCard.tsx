@@ -180,21 +180,21 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
     <div className="max-w-2xl mx-auto relative pb-20 swipe-container">
       {/* Swipe indicators */}
       <div className="absolute inset-0 pointer-events-none z-10">
-        <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+        <div className={`absolute bottom-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
           swipeDirection === 'right' 
-            ? 'bg-green-600 text-white scale-110 shadow-lg' 
-            : 'bg-green-500 text-white'
+            ? 'bg-green-500/20 text-green-600 scale-110' 
+            : 'bg-green-500/10 text-green-500'
         }`}>
           <Check size={16} className="mr-1" />
-          I Know
+          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>I Know</span>
         </div>
-        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+        <div className={`absolute bottom-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
           swipeDirection === 'left' 
-            ? 'bg-red-600 text-white scale-110 shadow-lg' 
-            : 'bg-red-500 text-white'
+            ? 'bg-red-500/20 text-red-600 scale-110' 
+            : 'bg-red-500/10 text-red-500'
         }`}>
           <X size={16} className="mr-1" />
-          I Don't Know
+          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>I Don't Know</span>
         </div>
       </div>
       
@@ -263,21 +263,21 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
     <div className="max-w-2xl mx-auto relative pb-20 swipe-container">
       {/* Swipe indicators */}
       <div className="absolute inset-0 pointer-events-none z-10">
-        <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+        <div className={`absolute bottom-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
           swipeDirection === 'right' 
-            ? 'bg-green-600 text-white scale-110 shadow-lg' 
-            : 'bg-green-500 text-white'
+            ? 'bg-green-500/20 text-green-600 scale-110' 
+            : 'bg-green-500/10 text-green-500'
         }`}>
           <Check size={16} className="mr-1" />
-          I Know
+          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>I Know</span>
         </div>
-        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
+        <div className={`absolute bottom-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
           swipeDirection === 'left' 
-            ? 'bg-red-600 text-white scale-110 shadow-lg' 
-            : 'bg-red-500 text-white'
+            ? 'bg-red-500/20 text-red-600 scale-110' 
+            : 'bg-red-500/10 text-red-500'
         }`}>
           <X size={16} className="mr-1" />
-          I Don't Know
+          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>I Don't Know</span>
         </div>
       </div>
       
