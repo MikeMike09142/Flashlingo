@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import { Plus, Search, BookOpen, ChevronDown, Grid, List, Download, Upload } from 'lucide-react';
+import { Plus, Search, BookOpen, ChevronDown, Download, Upload } from 'lucide-react';
 import FlashcardItem from '../components/flashcard/FlashcardItem';
 import { LanguageLevel, Flashcard } from '../types';
 
@@ -24,6 +24,10 @@ const HomePage: React.FC = () => {
 
   const [isLevelDropdownOpen, setIsLevelDropdownOpen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState<LanguageLevel | null>(null);
+
+  useEffect(() => {
+    setSearchTerm('');
+  }, []);
 
   const flashcardsOnScreen = selectedLevel
     ? filteredFlashcards.filter(card => card.level === selectedLevel)
@@ -90,27 +94,6 @@ const HomePage: React.FC = () => {
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
         <h1 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">My Flashcards</h1>
         <div className="flex items-center flex-wrap justify-start md:justify-end gap-2">
-          <button
-            onClick={handleExport}
-            className="flex items-center px-4 py-2 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-100 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors duration-200"
-          >
-            <Download className="w-5 h-5 mr-2" />
-            Export
-          </button>
-          <button
-            onClick={() => document.getElementById('import-input')?.click()}
-            className="flex items-center px-4 py-2 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-100 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors duration-200"
-          >
-            <Upload className="w-5 h-5 mr-2" />
-            Import
-          </button>
-          <input
-            type="file"
-            id="import-input"
-            className="hidden"
-            accept=".json"
-            onChange={handleImport}
-          />
           <Link
             to="/flashcards/new"
             className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
@@ -177,43 +160,17 @@ const HomePage: React.FC = () => {
             <option value="oldest">Oldest First</option>
             <option value="alphabetical">Alphabetical</option>
           </select>
-
-          {/* View Mode Toggle */}
-          <div className="flex items-center space-x-2">
-            <button
-              className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-primary-100 text-primary-600' : 'text-neutral-400 hover:bg-neutral-100'}`}
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid className="w-5 h-5" />
-            </button>
-            <button
-              className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-primary-100 text-primary-600' : 'text-neutral-400 hover:bg-neutral-100'}`}
-              onClick={() => setViewMode('list')}
-            >
-              <List className="w-5 h-5" />
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Flashcards Grid/List */}
-      {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {flashcardsOnScreen.map(flashcard => (
-            <div key={flashcard.id} className="h-full min-h-[260px] max-h-[380px] flex">
-              <FlashcardItem flashcard={flashcard} />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {flashcardsOnScreen.map(flashcard => (
-            <div key={flashcard.id} className="h-[120px] flex">
-              <FlashcardItem flashcard={flashcard} />
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Sólo modo galería */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {flashcardsOnScreen.map(flashcard => (
+          <div key={flashcard.id} className="h-full min-h-[260px] max-h-[380px] flex">
+            <FlashcardItem flashcard={flashcard} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

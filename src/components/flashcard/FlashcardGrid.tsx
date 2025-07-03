@@ -55,9 +55,9 @@ const FlashcardGrid: React.FC<FlashcardGridProps> = ({
   }
   
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
       {flashcards.map(flashcard => (
-        <div key={flashcard.id} className="h-full min-h-[260px] max-h-[380px] flex">
+        <div key={flashcard.id} className="h-full min-h-[220px] max-h-[340px] flex">
           <FlashcardItem 
             flashcard={flashcard} 
             onSelect={() => handleSelectCard(flashcard.id)}

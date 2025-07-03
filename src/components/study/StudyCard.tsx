@@ -20,10 +20,11 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   
-  const [{ x, rotate, scale }, api] = useSpring(() => ({
+  const [{ x, rotate, scale, opacity }, api] = useSpring(() => ({
     x: 0,
     rotate: 0,
     scale: 1,
+    opacity: 1,
     config: { tension: 300, friction: 30 },
   }));
 
@@ -32,7 +33,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
     setIsFlipped(false);
     setIsTransitioning(false);
     setSwipeDirection(null);
-    api.start({ x: 0, rotate: 0, scale: 1 });
+    api.start({ x: 0, rotate: 0, scale: 1, opacity: 1 });
   }, [flashcard.id, api]);
 
   const handleFlip = useCallback((e?: React.MouseEvent) => {
@@ -85,7 +86,8 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
           api.start({
             x: window.innerWidth,
             rotate: 20,
-            scale: 0.8,
+            scale: 0.9,
+            opacity: 0,
             config: { friction: 50, tension: 200 },
           });
         } else {
@@ -95,7 +97,8 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
           api.start({
             x: -window.innerWidth,
             rotate: -20,
-            scale: 0.8,
+            scale: 0.9,
+            opacity: 0,
             config: { friction: 50, tension: 200 },
           });
         }
@@ -116,6 +119,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
           x: xMovement, 
           rotate: rotation, 
           scale: scaleValue,
+          opacity: 1,
           config: { friction: 50, tension: 500 } 
         });
       }
@@ -200,7 +204,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
       
       <animated.div
         {...bind()}
-        style={{ x, rotate, scale, touchAction: 'none' }}
+        style={{ x, rotate, scale, touchAction: 'pan-y', opacity }}
         className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 ${
           swipeDirection === 'right' 
             ? 'bg-green-50 dark:bg-green-900/20' 
@@ -247,6 +251,18 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
                   <Volume2 size={20} />
                 </button>
               </div>
+
+              {flashcard.englishSentence && (
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">{flashcard.englishSentence}</p>
+                  <button
+                    onClick={handlePronounceEnglishSentence}
+                    className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                  >
+                    <Volume2 size={16} />
+                  </button>
+                </div>
+              )}
             </div>
             
             <div className="text-center text-neutral-500 dark:text-neutral-400">
@@ -283,7 +299,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
       
       <animated.div
         {...bind()}
-        style={{ x, rotate, scale, touchAction: 'none' }}
+        style={{ x, rotate, scale, touchAction: 'pan-y', opacity }}
         className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 ${
           swipeDirection === 'right' 
             ? 'bg-green-50 dark:bg-green-900/20' 

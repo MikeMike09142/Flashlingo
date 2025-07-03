@@ -182,3 +182,31 @@ button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
+
+/* Estilos para mejorar el manejo táctil en las tarjetas de estudio */
+.swipe-card {
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.swipe-container {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevenir zoom en dispositivos táctiles */
+@media (max-width: 768px) {
+  .swipe-card {
+    touch-action: manipulation;
+  }
+  
+  .swipe-container {
+    touch-action: manipulation;
+  }
+}

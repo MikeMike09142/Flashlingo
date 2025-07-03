@@ -3,7 +3,7 @@ import { useAppContext } from '../context/AppContext';
 import FlashcardGrid from '../components/flashcard/FlashcardGrid';
 import FlashcardList from '../components/flashcard/FlashcardList';
 import EmptyState from '../components/ui/EmptyState';
-import { Star, LayoutGrid, Layers } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 const FavoritesPage: React.FC = () => {
   const { flashcards, viewMode, setViewMode } = useAppContext();
@@ -18,30 +18,7 @@ const FavoritesPage: React.FC = () => {
           <p className="text-neutral-600">Your most important words and phrases</p>
         </div>
         
-        <div className="inline-flex overflow-hidden rounded-lg border border-neutral-200">
-          <button
-            onClick={() => setViewMode('cards')}
-            className={`p-2 ${
-              viewMode === 'cards'
-                ? 'bg-primary-50 text-primary-600'
-                : 'bg-white text-neutral-600 hover:bg-neutral-50'
-            }`}
-            aria-label="Card view"
-          >
-            <LayoutGrid size={20} />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-2 ${
-              viewMode === 'list'
-                ? 'bg-primary-50 text-primary-600'
-                : 'bg-white text-neutral-600 hover:bg-neutral-50'
-            }`}
-            aria-label="List view"
-          >
-            <Layers size={20} />
-          </button>
-        </div>
+        <div />
       </div>
       
       {favoriteCards.length === 0 ? (
@@ -54,17 +31,10 @@ const FavoritesPage: React.FC = () => {
         />
       ) : (
         <>
-          {viewMode === 'cards' ? (
-            <FlashcardGrid 
-              flashcards={favoriteCards} 
-              emptyMessage="No favorite cards found"
-            />
-          ) : (
-            <FlashcardList 
-              flashcards={favoriteCards}
-              emptyMessage="No favorite cards found"
-            />
-          )}
+          <FlashcardGrid 
+            flashcards={favoriteCards} 
+            emptyMessage="No favorite cards found"
+          />
         </>
       )}
     </div>

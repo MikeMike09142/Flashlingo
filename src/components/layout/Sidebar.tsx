@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import * as LucideIcons from 'lucide-react';
 import { BookOpen, Star, Check, BarChart, Sliders, Home, Plus, Trash2, X } from 'lucide-react';
@@ -11,7 +11,8 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
   const location = useLocation();
-  const { categories, activeCategory, setActiveCategory, deleteCategory, addCategory, availableIcons, isGuest } = useAppContext();
+  const navigate = useNavigate();
+  const { categories, activeCategory, setActiveCategory, deleteCategory, addCategory, availableIcons, isGuest, flashcards } = useAppContext();
   
   const iconMap: { [key: string]: React.ComponentType<LucideIcons.LucideProps> } = {
     book: LucideIcons.BookOpen,
@@ -33,8 +34,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
     return <span className="text-xl leading-none">{iconValue}</span>;
   };
 
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+
   const handleCategoryClick = (categoryId: string | null) => {
     setActiveCategory(categoryId === activeCategory ? null : categoryId);
+    navigate('/');
     if (window.innerWidth < 768) {
       closeSidebar();
     }
@@ -50,7 +54,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
     { path: '/', label: 'Home', icon: <Home size={20} /> },
     { path: '/study', label: 'Study Cards', icon: <BookOpen size={20} /> },
     { path: '/favorites', label: 'Favorites', icon: <Star size={20} /> },
-    { path: '/stats', label: 'Statistics', icon: <BarChart size={20} /> },
     { path: '/settings', label: 'Settings', icon: <Sliders size={20} /> },
   ];
   
@@ -80,6 +83,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
   const handleCancelAddCategory = () => {
     setNewCategoryName('');
     setIsAddingCategory(false);
+  };
+
+  // Función para contar flashcards por categoría y nivel
+  const getCategoryStats = (categoryId: string) => {
+    const cards = flashcards.filter(card => card.categoryIds.includes(categoryId));
+    const total = cards.length;
+    const levels: Record<string, number> = {};
+    ['A1','A2','B1','B2','C1','C2'].forEach(lvl => {
+      levels[lvl] = cards.filter(card => card.level === lvl).length;
+    });
+    return { total, levels };
   };
 
   return (
@@ -174,43 +188,49 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
 
               <ul className="space-y-1">
                 {/* All Categories Option */}
-                <li>
+                <li className="relative">
                   <button
-                    className={`flex items-center flex-1 px-3 py-2 rounded-lg transition-colors duration-200 ${
+                    className={`flex items-center flex-1 px-3 py-2 rounded-lg transition-colors duration-200 w-full ${
                       activeCategory === null
                         ? 'bg-primary-50 dark:bg-primary-800 text-primary-700 dark:text-primary-100 font-medium'
                         : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'
                     }`}
-                    onClick={() => handleCategoryClick(null)}
+                    onClick={() => setShowCategoryDropdown((prev) => !prev)}
                   >
-                    <span className="mr-3 text-neutral-500 dark:text-neutral-400"><BookOpen size={20} /></span> {/* Using a default icon */}
+                    <span className="mr-3 text-neutral-500 dark:text-neutral-400"><BookOpen size={20} /></span>
                     All Categories
+                    <svg className={`ml-auto w-4 h-4 transition-transform ${showCategoryDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                   </button>
+                  {showCategoryDropdown && (
+                    <ul className="absolute left-0 mt-2 w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                      {categories && categories.map((category) => {
+                        const stats = getCategoryStats(category.id);
+                        return (
+                          <li key={category.id}>
+                            <button
+                              className="flex flex-col items-start w-full px-3 py-2 text-left hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
+                              onClick={() => {
+                                handleCategoryClick(category.id);
+                                setShowCategoryDropdown(false);
+                              }}
+                            >
+                              <div className="flex items-center w-full">
+                                <span className="mr-3 text-neutral-500 dark:text-neutral-400">{renderIcon(category.icon)}</span>
+                                <span className="font-medium flex-1">{category.name}</span>
+                                <span className="ml-2 text-xs text-primary-500 font-bold">{stats.total}</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {Object.entries(stats.levels).filter(([,count])=>count>0).map(([lvl, count]) => (
+                                  <span key={lvl} className="bg-neutral-200 dark:bg-neutral-700 rounded-full px-2 py-0.5 text-xs font-semibold text-neutral-700 dark:text-neutral-200">{lvl}: {count}</span>
+                                ))}
+                              </div>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </li>
-                {categories && categories.map((category) => (
-                  <li key={category.id}>
-                    <div className="flex items-center">
-                      <button
-                        className={`flex items-center flex-1 px-3 py-2 rounded-lg transition-colors duration-200 ${
-                          activeCategory === category.id
-                            ? 'bg-primary-50 dark:bg-primary-800 text-primary-700 dark:text-primary-100 font-medium'
-                            : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'
-                        }`}
-                        onClick={() => handleCategoryClick(category.id)}
-                      >
-                        <span className="mr-3 text-neutral-500 dark:text-neutral-400"><BookOpen size={20} /></span>
-                        {category.name}
-                      </button>
-                      <button
-                        onClick={(e) => handleDeleteCategory(e, category.id)}
-                        className="p-1.5 text-error-600 hover:bg-error-50 rounded-full transition-colors duration-200"
-                        aria-label="Delete category"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </li>
-                ))}
               </ul>
             </div>
           </nav>

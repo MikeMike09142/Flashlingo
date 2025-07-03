@@ -18,6 +18,7 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 }) => {
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [retrySrc, setRetrySrc] = useState<string | null>(null);
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -26,8 +27,24 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 
   const handleError = () => {
     setIsLoading(false);
+    if (!hasError && !retrySrc) {
+      // Intentar reemplazar espacios por guiones bajos y viceversa
+      let newSrc = src.includes(' ') ? src.replace(/ /g, '_') : src.replace(/_/g, ' ');
+      if (newSrc !== src) {
+        setRetrySrc(newSrc);
+        return;
+      }
+    }
     setHasError(true);
   };
+
+  // Si retrySrc cambia, intentamos cargar esa nueva ruta
+  React.useEffect(() => {
+    if (retrySrc) {
+      setIsLoading(true);
+      setHasError(false);
+    }
+  }, [retrySrc]);
 
   if (hasError) {
     return (
@@ -48,7 +65,7 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
         </div>
       )}
       <img
-        src={src}
+        src={retrySrc || src}
         alt={alt}
         className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
         onLoad={handleLoad}

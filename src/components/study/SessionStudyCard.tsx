@@ -1,0 +1,688 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useAppContext } from '../../context/AppContext';
+import { Flashcard, StudySession } from '../../types';
+import { Volume2, ArrowRight, Check, X, Target, Clock, Mic, MicOff } from 'lucide-react';
+import { useSpring, animated } from 'react-spring';
+import { useDrag } from '@use-gesture/react';
+import ImageWithFallback from '../ui/ImageWithFallback';
+import { playSound } from '../../pages/StudyPage';
+
+interface SessionStudyCardProps {
+  session: StudySession;
+  onSessionComplete: (session: StudySession) => void;
+  onCardComplete: (cardId: string, knew: boolean) => void;
+  onExitSession: () => void;
+}
+
+const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
+  session,
+  onSessionComplete,
+  onCardComplete,
+  onExitSession
+}) => {
+  const { flashcards, categories, studyTargetLanguage, updateFlashcard, theme } = useAppContext();
+  const [currentCardIndex, setCurrentCardIndex] = useState(session.currentCardIndex);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [sessionCards, setSessionCards] = useState<Flashcard[]>([]);
+  const pendingProgress = useRef<{ [cardId: string]: any }>({});
+  const failCounts = useRef<{ [cardId: string]: number }>({});
+  const hasStartedRef = useRef(false);
+  const knownCardsRef = useRef<Set<string>>(new Set());
+  const reviewPileCardsRef = useRef<string[] | null>(null);
+  const [slowRevealStep, setSlowRevealStep] = useState(0);
+  const [reviewPile, setReviewPile] = useState<string[]>([]);
+  const [isReviewRound, setIsReviewRound] = useState(false);
+  const hasInitializedRef = useRef(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recognizedText, setRecognizedText] = useState('');
+  const [feedback, setFeedback] = useState<'none' | 'success' | 'fail'>('none');
+  let recognitionRef = useRef<any>(null);
+  const [frontLearning, setFrontLearning] = useState<boolean>(() => {
+    const saved = localStorage.getItem('frontLearning');
+    return saved ? saved === 'true' : true; // default: learning language al frente
+  });
+  const [showImages, setShowImages] = useState<boolean>(() => {
+    const saved = localStorage.getItem('recognitionShowImages');
+    return saved !== 'false'; // default true
+  });
+
+  const [{ x, rotate, scale, opacity }, api] = useSpring(() => ({
+    x: 0,
+    rotate: 0,
+    scale: 1,
+    opacity: 1,
+    config: { tension: 300, friction: 30 },
+  }));
+
+  // Refresca las tarjetas de la sesión solo cuando cambia la sesión (session.cards), sin tocar el índice
+  useEffect(() => {
+    // Solo refrescar la pila si NO estamos en review
+    if (!isReviewRound) {
+      const cards = session.cards
+        .map(cardId => flashcards.find(card => card.id === cardId))
+        .filter((card): card is Flashcard => card !== undefined);
+      setSessionCards(cards);
+      // NO modificar el currentCardIndex aquí
+      // hasInitializedRef.current = false; // Esto solo se reinicia al terminar la sesión
+    }
+  }, [session.cards, flashcards]);
+
+  // Reset card state when card changes
+  useEffect(() => {
+    setIsTransitioning(false);
+    setSwipeDirection(null);
+    api.start({ x: 0, rotate: 0, scale: 1, opacity: 1 });
+  }, [currentCardIndex, api]);
+
+  // Solo resetea el índice si cambia la cantidad de tarjetas (nueva ronda o repaso)
+  const prevSessionCardsLength = useRef(sessionCards.length);
+  useEffect(() => {
+    if (sessionCards.length !== prevSessionCardsLength.current) {
+      setCurrentCardIndex(0);
+      setIsFlipped(false);
+      prevSessionCardsLength.current = sessionCards.length;
+    }
+  }, [sessionCards.length]);
+
+  const currentCard = sessionCards[currentCardIndex];
+  const effectiveProgress = ((currentCardIndex + 1) / sessionCards.length) * 100;
+  const effectiveTimeElapsed = Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 1000);
+
+  // Prepare category and translation variables for use in all render paths
+  const categoriesList = currentCard?.categoryIds
+    ? currentCard.categoryIds
+        .map(id => categories.find(cat => cat.id === id))
+        .filter(cat => cat !== undefined)
+    : [];
+  const targetTranslation = studyTargetLanguage === 'french' ? currentCard?.frenchTranslation : currentCard?.spanishTranslation;
+  const targetSentence = studyTargetLanguage === 'french' ? currentCard?.frenchSentence : currentCard?.spanishSentence;
+
+  // Add a helper to refresh sessionCards from global flashcards
+  const refreshSessionCards = useCallback(() => {
+    const updatedCards = session.cards
+      .map(cardId => flashcards.find(card => card.id === cardId))
+      .filter((card): card is Flashcard => card !== undefined);
+    setSessionCards(updatedCards);
+  }, [flashcards, session.cards]);
+
+  const handleFlip = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
+    if(e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    if (isTransitioning) return;
+    
+    // Add a small delay to prevent conflicts with swipe gestures
+    setTimeout(() => {
+      setIsFlipped(f => !f);
+    }, 50);
+  }, [isTransitioning]);
+
+  const moveToNextCard = useCallback((e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setIsFlipped(false); // Resetea antes de cambiar de tarjeta
+    setCurrentCardIndex(prev => prev + 1);
+    if (theme.cardChangeSoundEnabled) {
+      try {
+        console.log('[DEBUG] Intentando reproducir sonido de cambio de tarjeta...');
+        playSound('playSound.mp3');
+      } catch (err) {
+        alert('Error al intentar reproducir el sonido: ' + err);
+        console.error('Error al intentar reproducir el sonido:', err);
+      }
+    }
+  }, [theme]);
+
+  // Add debug logging for card progression
+  useEffect(() => {
+    console.log('[DEBUG] useEffect: currentCardIndex:', currentCardIndex, 'sessionCards:', sessionCards.map(c => c.id).join(','));
+  }, [currentCardIndex, sessionCards]);
+
+  const handleKnow = useCallback((e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!currentCard) return;
+    if (session.mode !== 'freestyle_review') {
+      hasStartedRef.current = true;
+      setReviewPile(prev => prev.filter(id => id !== currentCard.id));
+      onCardComplete(currentCard.id, true);
+    }
+    moveToNextCard();
+  }, [currentCard, onCardComplete, moveToNextCard, session.mode]);
+
+  const handleDontKnow = useCallback((e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!currentCard) return;
+
+    if (session.mode !== 'freestyle_review') {
+      hasStartedRef.current = true;
+      
+      const progress = currentCard.studyProgress?.[studyTargetLanguage] || { studyLevel: 0, recognitionLevel: 0 };
+      const levelKey = session.mode === 'image' ? 'recognitionLevel' : 'studyLevel';
+      const level = progress[levelKey];
+
+      if (level < 3) {
+          setReviewPile(prev => (prev.includes(currentCard.id) ? prev : [...prev, currentCard.id]));
+      }
+      onCardComplete(currentCard.id, false);
+    }
+    moveToNextCard();
+  }, [currentCard, onCardComplete, moveToNextCard, studyTargetLanguage, session.mode]);
+
+  // Swipe gesture handling
+  const bind = useDrag(
+    ({ down, movement: [mx, my], direction: [xDir, yDir], velocity: [vx, vy] }) => {
+      const trigger = Math.abs(mx) > 100 || (Math.abs(vx) > 0.5 && Math.abs(mx) > 50);
+      
+      if (!down && trigger) {
+        const dir = xDir < 0 ? -1 : 1;
+        
+        if ('vibrate' in navigator) {
+          navigator.vibrate(50);
+        }
+        
+        const animateOut = (direction: 'left' | 'right') => {
+          api.start({
+            x: direction === 'right' ? window.innerWidth : -window.innerWidth,
+            rotate: direction === 'right' ? 20 : -20,
+            scale: 0.9,
+            opacity: 0,
+            config: { friction: 50, tension: 200 },
+          });
+        };
+        
+        setSwipeDirection(dir === 1 ? 'right' : 'left');
+        
+        if (dir === 1) { // Swipe right
+          handleKnow();
+        } else { // Swipe left
+          handleDontKnow();
+        }
+        animateOut(dir === 1 ? 'right' : 'left');
+
+      } else {
+        const xMovement = down ? mx : 0;
+        const rotation = down ? mx / 20 : 0;
+        const scaleValue = down ? 1 - Math.abs(mx) / 1000 : 1;
+        
+        if (down && Math.abs(mx) > 20) {
+          setSwipeDirection(mx < 0 ? 'left' : 'right');
+        } else if (!down) {
+          setSwipeDirection(null);
+        }
+        
+        api.start({ 
+          x: xMovement, 
+          rotate: rotation, 
+          scale: scaleValue,
+          opacity: 1,
+          config: { friction: 50, tension: 500 } 
+        });
+      }
+    },
+    { 
+      filterTaps: false,
+      rubberband: true,
+      bounds: { left: -300, right: 300 },
+      axis: 'x',
+      threshold: 10,
+      delay: 0
+    }
+  );
+
+  const handlePronounceWord = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentCard) return;
+    const utterance = new SpeechSynthesisUtterance(currentCard.englishWord);
+    utterance.lang = 'en-US';
+    window.speechSynthesis.speak(utterance);
+  }, [currentCard]);
+
+  const handlePronounceSentence = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentCard) return;
+    if (currentCard.englishSentence) {
+      const utterance = new SpeechSynthesisUtterance(currentCard.englishSentence);
+      utterance.lang = 'en-US';
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [currentCard]);
+
+  const handlePronounceTargetTranslation = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentCard) return;
+    const text = studyTargetLanguage === 'french' ? currentCard.frenchTranslation : currentCard.spanishTranslation;
+    const lang = studyTargetLanguage === 'french' ? 'fr-FR' : 'es-ES';
+    if (text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang;
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [currentCard, studyTargetLanguage]);
+
+  const handlePronounceTargetSentence = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentCard) return;
+    const text = studyTargetLanguage === 'french' ? currentCard.frenchSentence : currentCard.spanishSentence;
+    const lang = studyTargetLanguage === 'french' ? 'fr-FR' : 'es-ES';
+    if (text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang;
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [currentCard, studyTargetLanguage]);
+
+  // If the user exits the session early, discard all pending progress
+  const handleExitSession = useCallback(() => {
+    pendingProgress.current = {};
+    onExitSession();
+  }, [onExitSession]);
+
+  // Add a useEffect to handle session completion after every update
+  useEffect(() => {
+    console.log('[DEBUG][EFFECT] currentCardIndex:', currentCardIndex, 'sessionCards:', sessionCards.map(c => c.id).join(','), 'reviewPile:', reviewPile, 'isReviewRound:', isReviewRound, 'hasInitializedRef:', hasInitializedRef.current);
+    // Solo reiniciar la pila original al inicio real de la sesión (cuando currentCardIndex === 0, sessionCards está vacío, no estamos en review y no se ha inicializado)
+    if (
+      sessionCards.length === 0 &&
+      !isReviewRound &&
+      currentCardIndex === 0 &&
+      !hasInitializedRef.current
+    ) {
+      console.log('[DEBUG][INIT] Reiniciando pila original de tarjetas');
+      const cards = session.cards
+        .map(cardId => flashcards.find(card => card.id === cardId))
+        .filter((card): card is Flashcard => card !== undefined);
+      setSessionCards(cards);
+      setCurrentCardIndex(0);
+      setIsReviewRound(false);
+      setReviewPile([]);
+      hasInitializedRef.current = true;
+      return;
+    }
+
+    // Cuando se terminan todas las tarjetas de la ronda actual
+    if (currentCardIndex >= sessionCards.length) {
+      if (reviewPile.length > 0) {
+        console.log('[DEBUG][REVIEW] Iniciando ronda de repaso solo con las tarjetas falladas:', reviewPile);
+        // Iniciar una nueva ronda de repaso solo con las tarjetas falladas
+        const reviewCards = reviewPile
+          .map(cardId => flashcards.find(card => card.id === cardId))
+          .filter((card): card is Flashcard => card !== undefined);
+        setSessionCards(reviewCards);
+        setCurrentCardIndex(0);
+        setIsReviewRound(true);
+        setReviewPile([]); // Limpiar para la siguiente ronda
+        return;
+      } else {
+        console.log('[DEBUG][COMPLETE] No hay más tarjetas para repasar, la sesión termina');
+        // No hay más tarjetas para repasar, la sesión termina
+        Object.entries(pendingProgress.current).forEach(([cardId, studyProgress]) => {
+          if (knownCardsRef.current.has(cardId)) {
+            const langProgress = studyProgress[studyTargetLanguage] || {};
+            if (!langProgress.level || langProgress.level < 3) {
+              studyProgress[studyTargetLanguage] = { ...langProgress, level: 3 };
+            }
+          }
+          updateFlashcard(cardId, { studyProgress });
+        });
+        pendingProgress.current = {};
+        const completedSession = {
+          ...session,
+          isCompleted: true,
+          completedAt: new Date().toISOString(),
+          completedCards: session.cards,
+        };
+        if (sessionCards.length > 0) {
+          onSessionComplete(completedSession);
+        }
+        // Llama a la función de onComplete si existe
+        session.onComplete?.();
+        knownCardsRef.current = new Set();
+        setIsReviewRound(false);
+        // Permitir reinicio en una nueva sesión si el usuario vuelve a empezar
+        hasInitializedRef.current = false;
+      }
+    }
+  }, [
+    currentCardIndex,
+    sessionCards,
+    reviewPile,
+    isReviewRound,
+    flashcards,
+    session,
+    studyTargetLanguage,
+    updateFlashcard,
+    onSessionComplete
+  ]);
+
+  // Debug: log every update to currentCardIndex
+  useEffect(() => {
+    console.log('[DEBUG] currentCardIndex updated:', currentCardIndex);
+  }, [currentCardIndex]);
+
+  const expectedWord = currentCard?.englishWord?.toLowerCase().trim();
+
+  // Limpiar feedback y recognizedText solo cuando cambie la tarjeta
+  useEffect(() => {
+    setRecognizedText('');
+    setFeedback('none');
+  }, [currentCardIndex]);
+
+  const handleStartRecording = () => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      alert('La API de reconocimiento de voz no está soportada en este navegador.');
+      return;
+    }
+    setIsRecording(true);
+    setFeedback('none');
+    setRecognizedText('');
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (event: any) => {
+      const text = event.results[0][0].transcript.toLowerCase().trim();
+      setRecognizedText(text);
+      // Nueva lógica: aceptar repeticiones accidentales y evitar error si está vacío
+      if (!text) {
+        setFeedback('none'); // No mostrar error si no se reconoció nada
+      } else {
+        const expected = expectedWord;
+        const words = text.split(/\s+/).filter(Boolean);
+        const allMatch = words.length > 0 && words.every((w: string) => w === expected);
+        if (expected && allMatch) {
+          setFeedback('success');
+        } else {
+          setFeedback('fail');
+        }
+      }
+      setIsRecording(false);
+    };
+    recognition.onerror = () => {
+      setIsRecording(false);
+      setFeedback('fail');
+    };
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const handleStopRecording = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const toggleFrontLanguage = useCallback(() => {
+    setFrontLearning(prev => {
+      localStorage.setItem('frontLearning', (!prev).toString());
+      return !prev;
+    });
+  }, []);
+
+  const toggleShowImages = useCallback(() => {
+    setShowImages(prev => {
+      localStorage.setItem('recognitionShowImages', (!prev).toString());
+      return !prev;
+    });
+  }, []);
+
+  if (!currentCard) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-neutral-500">No more cards to review.</p>
+      </div>
+    );
+  }
+
+  // Determina el modo de la sesión
+  const sessionMode = session.mode || 'default';
+
+  // --------- Cálculo del idioma frontal/trasero basado en preferencia ---------
+  const learningWord = studyTargetLanguage === 'spanish'
+    ? currentCard?.spanishTranslation || ''
+    : studyTargetLanguage === 'french'
+    ? currentCard?.frenchTranslation || ''
+    : '';
+
+  const learningSentence = studyTargetLanguage === 'spanish'
+    ? currentCard?.spanishSentence || ''
+    : studyTargetLanguage === 'french'
+    ? currentCard?.frenchSentence || ''
+    : '';
+
+  const learningLang = studyTargetLanguage === 'spanish'
+    ? 'es-ES'
+    : studyTargetLanguage === 'french'
+    ? 'fr-FR'
+    : '';
+
+  const englishWordOnly = currentCard?.englishWord || '';
+  const englishSentenceOnly = currentCard?.englishSentence || '';
+
+  // En recognition siempre ocultamos texto del frente, pero respetamos el idioma
+  const frontIsLearning = frontLearning;
+  const showLearningOnFront = (!isFlipped && frontIsLearning) || (isFlipped && !frontIsLearning);
+
+  let word = showLearningOnFront ? learningWord : englishWordOnly;
+  let sentence = showLearningOnFront ? learningSentence : englishSentenceOnly;
+  let lang = showLearningOnFront ? learningLang : 'en-US';
+
+  // En recognition mode, invertimos audio/texto según estudio: si learning es francés, frente francés; si español, frente inglés (como antes)
+  if (sessionMode === 'image') {
+    if (studyTargetLanguage === 'spanish') {
+      // Frente inglés
+      word = showLearningOnFront ? englishWordOnly : learningWord;
+      sentence = showLearningOnFront ? englishSentenceOnly : learningSentence;
+      lang = showLearningOnFront ? 'en-US' : learningLang;
+    } else if (studyTargetLanguage === 'french') {
+      // Frente francés
+      word = showLearningOnFront ? learningWord : englishWordOnly;
+      sentence = showLearningOnFront ? learningSentence : englishSentenceOnly;
+      lang = showLearningOnFront ? learningLang : 'en-US';
+    }
+  }
+
+  const showText = !(sessionMode === 'image' && !isFlipped);
+
+  console.log('[DEBUG] render index', currentCardIndex, 'isFlipped', isFlipped, 'targetLang', studyTargetLanguage, 'word', word);
+
+  return (
+    <div className="w-full max-w-md sm:max-w-4xl mx-auto p-2 sm:p-4 h-[100dvh] flex flex-col justify-start" style={{maxHeight: '100dvh'}}>
+      {/* Session Header */}
+      <div className="mb-2 sm:mb-6">
+        <div className="flex items-center justify-between mb-2 sm:mb-4">
+          <button
+            onClick={handleExitSession}
+            className="text-sm text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
+          >
+            ← Exit Session
+          </button>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-500">
+            <div className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              {Math.floor(effectiveTimeElapsed / 60)}:{(effectiveTimeElapsed % 60).toString().padStart(2, '0')}
+            </div>
+            <div className="flex items-center gap-1">
+              <Target className="h-4 w-4" />
+              {currentCardIndex + 1} of {sessionCards.length}
+            </div>
+            {sessionMode === 'image' && (
+              <button
+                onClick={toggleShowImages}
+                className="px-3 py-1 text-xs rounded-full border border-neutral-500 dark:border-neutral-400 text-neutral-300 dark:text-neutral-300 active:scale-95 transition"
+              >
+                {showImages ? 'Hide Images' : 'Show Images'}
+              </button>
+            )}
+          </div>
+          <button
+            onClick={toggleFrontLanguage}
+            className="text-xs px-2 py-1 rounded border border-neutral-500 text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:border-neutral-600"
+          >
+            {frontLearning ? 'Front: Learning' : 'Front: English'}
+          </button>
+        </div>
+        
+        {/* Progress Bar */}
+        <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-2">
+          <div 
+            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${effectiveProgress}%` }}
+          />
+        </div>
+        
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-neutral-600 dark:text-neutral-400">
+            Session {session.sessionNumber} of {session.totalSessions}
+          </span>
+        </div>
+      </div>
+
+      {/* Card */}
+      <animated.div
+        key={currentCardIndex}
+        {...bind()}
+        style={{ 
+          x, 
+          rotate, 
+          scale, 
+          touchAction: 'pan-y', 
+          opacity,
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+          maxHeight: 'calc(100dvh - 120px)', // Ajuste para header
+          minHeight: '340px',
+        }}
+        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 select-none flex flex-col flex-1 justify-between bg-white dark:bg-neutral-800`}
+        tabIndex={0}
+        role="button"
+        aria-label="Tap to see translation"
+        onClick={handleFlip}
+      >
+        <div className="w-full h-full flex flex-col items-center justify-between bg-white dark:bg-neutral-800 p-2 sm:p-6 rounded-xl flex-1">
+          <div className="flex-1 flex flex-col items-center justify-center">
+            {(sessionMode !== 'image' || showImages) && currentCard.imageUrl && (
+              <div className="mb-2 sm:mb-4 w-32 h-32 sm:w-48 sm:h-48 rounded-lg overflow-hidden">
+                <ImageWithFallback
+                  src={currentCard.imageUrl}
+                  alt={word}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            {showText && (
+              <div className="text-center">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">{word}</h2>
+              </div>
+            )}
+            <div className="text-center">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const utterance = new SpeechSynthesisUtterance(word);
+                  utterance.lang = lang;
+                  window.speechSynthesis.speak(utterance);
+                }}
+                className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+              >
+                <Volume2 size={20} />
+              </button>
+            </div>
+            {showText && sentence && (
+              <div className="mt-2 sm:mt-4 text-center">
+                <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mb-1 sm:mb-2">
+                  {sentence}
+                </p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const utterance = new SpeechSynthesisUtterance(sentence);
+                    utterance.lang = lang;
+                    window.speechSynthesis.speak(utterance);
+                  }}
+                  className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                >
+                  <Volume2 size={20} />
+                </button>
+              </div>
+            )}
+            {!showText && sentence && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const utterance = new SpeechSynthesisUtterance(sentence);
+                    utterance.lang = lang;
+                    window.speechSynthesis.speak(utterance);
+                  }}
+                  className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                >
+                  <Volume2 size={16} />
+                </button>
+              </div>
+            )}
+            <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-8 mt-6 w-full">
+              {/* Botones de acción según el modo */}
+              {sessionMode === 'freestyle_review' ? (
+                <button
+                  onClick={(e) => !isTransitioning && moveToNextCard(e)}
+                  className="flex items-center justify-center px-8 py-4 rounded-full bg-orange-500 text-white text-lg font-semibold shadow-lg hover:bg-orange-600 transition-colors w-full sm:w-auto"
+                  aria-label="Reviewed"
+                >
+                  <Check size={28} className="mr-2" /> Card Reviewed
+                </button>
+              ) : sessionMode === 'image' ? (
+                <>
+                  <button
+                    onClick={(e) => handleDontKnow(e)}
+                    className="flex items-center justify-center px-8 py-4 rounded-full bg-red-600 text-white text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors w-full sm:w-auto"
+                    aria-label="I Don't Know"
+                  >
+                    <X size={28} />
+                  </button>
+                  <button
+                    onClick={(e) => handleKnow(e)}
+                    className="flex items-center justify-center px-8 py-4 rounded-full bg-green-600 text-white text-lg font-semibold shadow-lg hover:bg-green-700 transition-colors w-full sm:w-auto"
+                    aria-label="I Know"
+                  >
+                    <Check size={28} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={(e) => handleDontKnow(e)}
+                    className="flex items-center justify-center px-8 py-4 rounded-full bg-red-600 text-white text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors w-full sm:w-auto"
+                    aria-label="I Don't Know"
+                  >
+                    <X size={24} className="mr-2" />
+                  </button>
+                  <button
+                    onClick={(e) => handleKnow(e)}
+                    className="flex items-center justify-center px-8 py-4 rounded-full bg-green-600 text-white text-lg font-semibold shadow-lg hover:bg-green-700 transition-colors w-full sm:w-auto"
+                    aria-label="I Know"
+                  >
+                    <Check size={24} className="mr-2" />
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="text-center text-neutral-500 dark:text-neutral-400">
+            <p>{!isFlipped ? 'Tap to see translation • Swipe o usa los botones para responder' : 'Tap to return • Swipe o usa los botones para responder'}</p>
+            <ArrowRight className="mx-auto mt-2" size={20} />
+          </div>
+        </div>
+      </animated.div>
+    </div>
+  );
+};
+
+export default SessionStudyCard; 

@@ -31,7 +31,7 @@
   
   /* Improve touch responsiveness */
   .swipe-card {
-    touch-action: none !important; /* Critical for gesture recognition */
+    touch-action: pan-y;
     will-change: transform;
   }
   
