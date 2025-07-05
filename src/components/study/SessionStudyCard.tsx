@@ -494,14 +494,12 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
 
   return (
     <div
-      className="w-full flex flex-col justify-center items-center bg-transparent"
+      className="w-full flex flex-col justify-center items-center bg-transparent px-4"
       style={{
         height: '100dvh',
         boxSizing: 'border-box',
         paddingBottom: 'env(safe-area-inset-bottom)',
         overflow: 'hidden',
-        paddingLeft: '16px',
-        paddingRight: '16px',
       }}
     >
       {/* Session Header */}
@@ -570,9 +568,9 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
           height: 'calc(100dvh - 200px)',
           minHeight: '400px',
           width: '100%',
-          maxWidth: 'min(400px, calc(100vw - 32px))',
+          maxWidth: '400px',
         }}
-        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 select-none flex flex-col bg-white dark:bg-neutral-800`}
+        className={`mx-auto self-center rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 select-none flex flex-col bg-white dark:bg-neutral-800`}
         tabIndex={0}
         role="button"
         aria-label="Tap to see translation"

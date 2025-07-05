@@ -213,9 +213,9 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
           height: 'calc(100dvh - 100px)',
           minHeight: '400px',
           width: '100%',
-          maxWidth: 'min(400px, calc(100vw - 32px))',
+          maxWidth: '400px',
         }}
-        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 flex flex-col items-center bg-white dark:bg-neutral-800`}
+        className={`mx-auto self-center rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 flex flex-col items-center bg-white dark:bg-neutral-800`}
         onClick={handleFlip}
         tabIndex={0}
         role="button"
@@ -329,9 +329,9 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
           height: 'calc(100dvh - 100px)',
           minHeight: '400px',
           width: '100%',
-          maxWidth: 'min(400px, calc(100vw - 32px))',
+          maxWidth: '400px',
         }}
-        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 flex flex-col items-center bg-white dark:bg-neutral-800`}
+        className={`mx-auto self-center rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 flex flex-col items-center bg-white dark:bg-neutral-800`}
         onClick={handleFlip}
         tabIndex={0}
         role="button"
