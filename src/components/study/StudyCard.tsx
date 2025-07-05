@@ -181,7 +181,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   const targetLangName = studyTargetLanguage === 'french' ? 'French' : 'Spanish';
 
   if (!isFlipped) return (
-    <div className="max-w-2xl mx-auto relative pb-20 swipe-container">
+    <div className="w-full relative swipe-container h-[100dvh] flex flex-col justify-center items-center overflow-hidden px-4" style={{paddingBottom: 'env(safe-area-inset-bottom)'}}>
       {/* Swipe indicators */}
       <div className="absolute inset-0 pointer-events-none z-10">
         <div className={`absolute bottom-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
@@ -204,22 +204,26 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
       
       <animated.div
         {...bind()}
-        style={{ x, rotate, scale, touchAction: 'pan-y', opacity }}
-        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 ${
-          swipeDirection === 'right' 
-            ? 'bg-green-50 dark:bg-green-900/20' 
-            : swipeDirection === 'left' 
-            ? 'bg-red-50 dark:bg-red-900/20'
-            : 'bg-white dark:bg-neutral-800'
-        }`}
+        style={{ 
+          x, 
+          rotate, 
+          scale, 
+          touchAction: 'pan-y', 
+          opacity,
+          height: 'calc(100dvh - 100px)',
+          minHeight: '400px',
+          width: '100%',
+          maxWidth: 'min(400px, calc(100vw - 32px))',
+        }}
+        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 flex flex-col items-center bg-white dark:bg-neutral-800`}
         onClick={handleFlip}
         tabIndex={0}
         role="button"
         aria-label={`Tap to see ${targetLangName} translation`}
       >
-        <div className="p-6" style={{ minHeight: '300px' }}>
-          {/* Front side */}
-          <div className="w-full h-full flex flex-col justify-between">
+        <div className="p-4 w-full flex flex-col items-center gap-y-2 select-none">
+          {/* Front/Back side */}
+          <div className="w-full flex flex-col items-center gap-y-2 select-none">
             <div className="flex justify-end space-x-2">
               {categoriesList.map((category: any) => (
                 <span
@@ -231,42 +235,59 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
                 </span>
               ))}
             </div>
-            
-            <div className="flex-1 flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center">
               {flashcard.imageUrl && (
-                <ImageWithFallback
-                  src={flashcard.imageUrl}
-                  alt="Flashcard"
-                  className="max-h-48 mb-4 rounded-lg object-cover"
-                  fallbackText="Imagen no disponible"
-                />
+                <div className="mb-2 sm:mb-4 w-40 h-40 sm:w-60 sm:h-60 rounded-lg overflow-hidden">
+                  <ImageWithFallback
+                    src={flashcard.imageUrl}
+                    alt={flashcard.englishWord}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               )}
-              
-              <div className="text-center">
-                <h2 className="text-2xl font-bold mb-2">{flashcard.englishWord}</h2>
+              <div className="text-center select-none">
+                <h2 className="text-2xl font-bold mb-2 select-none">{flashcard.englishWord}</h2>
                 <button
                   onClick={handlePronounceWord}
-                  className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                  className="p-3 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
                 >
-                  <Volume2 size={20} />
+                  <Volume2 size={24} className="text-sky-600" />
                 </button>
               </div>
 
               {flashcard.englishSentence && (
-                <div className="mt-4 text-center">
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">{flashcard.englishSentence}</p>
+                <div className="mt-4 text-center select-none">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2 select-none">{flashcard.englishSentence}</p>
                   <button
                     onClick={handlePronounceEnglishSentence}
-                    className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                    className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
                   >
-                    <Volume2 size={16} />
+                    <Volume2 size={20} className="text-sky-600" />
                   </button>
                 </div>
               )}
             </div>
-            
-            <div className="text-center text-neutral-500 dark:text-neutral-400">
-              <p>Tap to see translation • Swipe left/right to answer</p>
+          </div>
+          {/* Botones de acción + instrucciones */}
+          <div className="w-full">
+            <div className="flex flex-row justify-between gap-4 mt-2 w-full max-w-xs mx-auto">
+              <button
+                onClick={onDontKnow}
+                className="flex items-center justify-center px-1 py-4 w-1/2 max-w-[160px] rounded-xl bg-red-600 text-white text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors"
+                aria-label="I Don't Know"
+              >
+                <X size={28} />
+              </button>
+              <button
+                onClick={onKnow}
+                className="flex items-center justify-center px-1 py-4 w-1/2 max-w-[160px] rounded-xl bg-green-600 text-white text-lg font-semibold shadow-lg hover:bg-green-700 transition-colors"
+                aria-label="I Know"
+              >
+                <Check size={28} />
+              </button>
+            </div>
+            <div className="text-center text-neutral-500 dark:text-neutral-400 select-none mt-2">
+              <p className="select-none">Tap to see translation • Swipe left/right to answer</p>
               <ArrowRight className="mx-auto mt-2" size={20} />
             </div>
           </div>
@@ -276,7 +297,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   )
 
   return (
-    <div className="max-w-2xl mx-auto relative pb-20 swipe-container">
+    <div className="w-full relative swipe-container h-[100dvh] flex flex-col justify-center items-center overflow-hidden px-4" style={{paddingBottom: 'env(safe-area-inset-bottom)'}}>
       {/* Swipe indicators */}
       <div className="absolute inset-0 pointer-events-none z-10">
         <div className={`absolute bottom-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
@@ -299,22 +320,26 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
       
       <animated.div
         {...bind()}
-        style={{ x, rotate, scale, touchAction: 'pan-y', opacity }}
-        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 ${
-          swipeDirection === 'right' 
-            ? 'bg-green-50 dark:bg-green-900/20' 
-            : swipeDirection === 'left' 
-            ? 'bg-red-50 dark:bg-red-900/20'
-            : 'bg-white dark:bg-neutral-800'
-        }`}
+        style={{ 
+          x, 
+          rotate, 
+          scale, 
+          touchAction: 'pan-y', 
+          opacity,
+          height: 'calc(100dvh - 100px)',
+          minHeight: '400px',
+          width: '100%',
+          maxWidth: 'min(400px, calc(100vw - 32px))',
+        }}
+        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 flex flex-col items-center bg-white dark:bg-neutral-800`}
         onClick={handleFlip}
         tabIndex={0}
         role="button"
-        aria-label="Tap to see English word"
+        aria-label={`Tap to see ${targetLangName} translation`}
       >
-        <div className="p-6" style={{ minHeight: '300px' }}>
-          {/* Back side */}
-          <div className="w-full h-full flex flex-col justify-between">
+        <div className="p-4 w-full flex flex-col items-center gap-y-2 select-none">
+          {/* Front/Back side */}
+          <div className="w-full flex flex-col items-center gap-y-2 select-none">
             <div className="flex justify-end space-x-2">
               {categoriesList.map((category: any) => (
                 <span
@@ -326,33 +351,50 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
                 </span>
               ))}
             </div>
-            
-            <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold mb-2">{targetTranslation}</h2>
+            <div className="flex flex-col items-center">
+              <div className="text-center select-none">
+                <h2 className="text-2xl font-bold mb-2 select-none">{targetTranslation}</h2>
                 <button
                   onClick={handlePronounceTargetTranslation}
-                  className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                  className="p-3 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
                 >
-                  <Volume2 size={20} />
+                  <Volume2 size={24} className="text-sky-600" />
                 </button>
               </div>
               
               {targetSentence && (
-                <div className="mt-4 text-center">
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">{targetSentence}</p>
+                <div className="mt-4 text-center select-none">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2 select-none">{targetSentence}</p>
                   <button
                     onClick={handlePronounceTargetSentence}
-                    className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                    className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
                   >
-                    <Volume2 size={16} />
+                    <Volume2 size={20} className="text-sky-600" />
                   </button>
                 </div>
               )}
             </div>
-            
-            <div className="text-center text-neutral-500 dark:text-neutral-400">
-              <p>Tap to see English word • Swipe left/right to answer</p>
+          </div>
+          {/* Botones de acción + instrucciones */}
+          <div className="w-full">
+            <div className="flex flex-row justify-between gap-4 mt-2 w-full max-w-xs mx-auto">
+              <button
+                onClick={onDontKnow}
+                className="flex items-center justify-center px-1 py-4 w-1/2 max-w-[160px] rounded-xl bg-red-600 text-white text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors"
+                aria-label="I Don't Know"
+              >
+                <X size={28} />
+              </button>
+              <button
+                onClick={onKnow}
+                className="flex items-center justify-center px-1 py-4 w-1/2 max-w-[160px] rounded-xl bg-green-600 text-white text-lg font-semibold shadow-lg hover:bg-green-700 transition-colors"
+                aria-label="I Know"
+              >
+                <Check size={28} />
+              </button>
+            </div>
+            <div className="text-center text-neutral-500 dark:text-neutral-400 select-none mt-2">
+              <p className="select-none">Tap to see translation • Swipe left/right to answer</p>
               <ArrowRight className="mx-auto mt-2" size={20} />
             </div>
           </div>

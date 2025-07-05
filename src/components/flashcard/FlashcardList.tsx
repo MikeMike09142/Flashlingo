@@ -64,10 +64,10 @@ const FlashcardList: React.FC<FlashcardListProps> = ({
                     
                     <button
                       onClick={(e) => handlePronunciation(e, flashcard.englishWord)}
-                      className="p-1 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
+                      className="p-1.5 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                       aria-label="Pronounce word"
                     >
-                      <Volume2 size={16} />
+                      <Volume2 size={18} className="text-sky-600" />
                     </button>
                     
                     {flashcard.isFavorite && (
@@ -86,10 +86,10 @@ const FlashcardList: React.FC<FlashcardListProps> = ({
                         utterance.lang = 'en-US';
                         window.speechSynthesis.speak(utterance);
                       }}
-                      className="p-1 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
+                      className="p-1.5 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                       aria-label="Pronounce English sentence"
                     >
-                      <Volume2 size={16} />
+                      <Volume2 size={18} className="text-sky-600" />
                     </button>
                   </div>
                   

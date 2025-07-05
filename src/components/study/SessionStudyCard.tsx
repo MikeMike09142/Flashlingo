@@ -493,9 +493,19 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
   console.log('[DEBUG] render index', currentCardIndex, 'isFlipped', isFlipped, 'targetLang', studyTargetLanguage, 'word', word);
 
   return (
-    <div className="w-full max-w-md sm:max-w-4xl mx-auto p-2 sm:p-4 h-[100dvh] flex flex-col justify-start" style={{maxHeight: '100dvh'}}>
+    <div
+      className="w-full flex flex-col justify-center items-center bg-transparent"
+      style={{
+        height: '100dvh',
+        boxSizing: 'border-box',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        overflow: 'hidden',
+        paddingLeft: '16px',
+        paddingRight: '16px',
+      }}
+    >
       {/* Session Header */}
-      <div className="mb-2 sm:mb-6">
+      <div className="absolute top-0 left-0 right-0 mb-2 sm:mb-6 z-10 px-4">
         <div className="flex items-center justify-between mb-2 sm:mb-4">
           <button
             onClick={handleExitSession}
@@ -537,8 +547,8 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
           />
         </div>
         
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-neutral-600 dark:text-neutral-400">
+        <div className="flex items-center justify-between text-sm select-none">
+          <span className="text-neutral-600 dark:text-neutral-400 select-none">
             Session {session.sessionNumber} of {session.totalSessions}
           </span>
         </div>
@@ -557,127 +567,110 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
           userSelect: 'none',
           WebkitUserSelect: 'none',
           WebkitTouchCallout: 'none',
-          maxHeight: 'calc(100dvh - 120px)', // Ajuste para header
-          minHeight: '340px',
+          height: 'calc(100dvh - 200px)',
+          minHeight: '400px',
+          width: '100%',
+          maxWidth: 'min(400px, calc(100vw - 32px))',
         }}
-        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 select-none flex flex-col flex-1 justify-between bg-white dark:bg-neutral-800`}
+        className={`rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 select-none flex flex-col bg-white dark:bg-neutral-800`}
         tabIndex={0}
         role="button"
         aria-label="Tap to see translation"
         onClick={handleFlip}
       >
-        <div className="w-full h-full flex flex-col items-center justify-between bg-white dark:bg-neutral-800 p-2 sm:p-6 rounded-xl flex-1">
-          <div className="flex-1 flex flex-col items-center justify-center">
-            {(sessionMode !== 'image' || showImages) && currentCard.imageUrl && (
-              <div className="mb-2 sm:mb-4 w-32 h-32 sm:w-48 sm:h-48 rounded-lg overflow-hidden">
-                <ImageWithFallback
-                  src={currentCard.imageUrl}
-                  alt={word}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-            {showText && (
-              <div className="text-center">
-                <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">{word}</h2>
-              </div>
-            )}
-            <div className="text-center">
+        <div className="w-full h-full flex flex-col items-center gap-y-2 bg-white dark:bg-neutral-800 p-2 sm:p-6 rounded-xl select-none">
+          {(sessionMode !== 'image' || showImages) && currentCard.imageUrl && (
+            <div className="mb-2 sm:mb-4 w-40 h-40 sm:w-60 sm:h-60 rounded-lg overflow-hidden">
+              <ImageWithFallback
+                src={currentCard.imageUrl}
+                alt={word}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          {showText && (
+            <div className="text-center select-none">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 select-none truncate">{word}</h2>
+            </div>
+          )}
+          <div className="text-center select-none">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = lang;
+                window.speechSynthesis.speak(utterance);
+              }}
+              className="p-3 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
+            >
+              <Volume2 size={24} className="text-sky-600" />
+            </button>
+          </div>
+          {showText && sentence && (
+            <div className="mt-2 sm:mt-4 text-center select-none">
+              <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mb-1 sm:mb-2 select-none break-words">{sentence}</p>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  const utterance = new SpeechSynthesisUtterance(word);
+                  const utterance = new SpeechSynthesisUtterance(sentence);
                   utterance.lang = lang;
                   window.speechSynthesis.speak(utterance);
                 }}
-                className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
               >
-                <Volume2 size={20} />
+                <Volume2 size={20} className="text-sky-600" />
               </button>
             </div>
-            {showText && sentence && (
-              <div className="mt-2 sm:mt-4 text-center">
-                <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mb-1 sm:mb-2">
-                  {sentence}
-                </p>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const utterance = new SpeechSynthesisUtterance(sentence);
-                    utterance.lang = lang;
-                    window.speechSynthesis.speak(utterance);
-                  }}
-                  className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
-                >
-                  <Volume2 size={20} />
-                </button>
-              </div>
-            )}
-            {!showText && sentence && (
-              <div className="mt-4 text-center">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const utterance = new SpeechSynthesisUtterance(sentence);
-                    utterance.lang = lang;
-                    window.speechSynthesis.speak(utterance);
-                  }}
-                  className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
-                >
-                  <Volume2 size={16} />
-                </button>
-              </div>
-            )}
-            <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-8 mt-6 w-full">
-              {/* Botones de acción según el modo */}
+          )}
+          {!showText && sentence && (
+            <div className="mt-4 text-center select-none">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const utterance = new SpeechSynthesisUtterance(sentence);
+                  utterance.lang = lang;
+                  window.speechSynthesis.speak(utterance);
+                }}
+                className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
+              >
+                <Volume2 size={18} className="text-sky-600" />
+              </button>
+            </div>
+          )}
+          {/* Botones de acción + instrucciones */}
+          <div className="w-full">
+            <div className="flex flex-row justify-between gap-4 mt-2 w-[320px] max-w-full mx-auto">
               {sessionMode === 'freestyle_review' ? (
                 <button
                   onClick={(e) => !isTransitioning && moveToNextCard(e)}
-                  className="flex items-center justify-center px-8 py-4 rounded-full bg-orange-500 text-white text-lg font-semibold shadow-lg hover:bg-orange-600 transition-colors w-full sm:w-auto"
+                  className="flex items-center justify-center px-1 py-4 w-full max-w-[140px] rounded-xl bg-orange-500 text-white text-lg font-semibold shadow-lg hover:bg-orange-600 transition-colors"
                   aria-label="Reviewed"
                 >
                   <Check size={28} className="mr-2" /> Card Reviewed
                 </button>
-              ) : sessionMode === 'image' ? (
+              ) : (
                 <>
                   <button
                     onClick={(e) => handleDontKnow(e)}
-                    className="flex items-center justify-center px-8 py-4 rounded-full bg-red-600 text-white text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors w-full sm:w-auto"
+                    className="flex items-center justify-center px-1 py-4 w-1/2 max-w-[140px] rounded-xl bg-red-600 text-white text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors"
                     aria-label="I Don't Know"
                   >
                     <X size={28} />
                   </button>
                   <button
                     onClick={(e) => handleKnow(e)}
-                    className="flex items-center justify-center px-8 py-4 rounded-full bg-green-600 text-white text-lg font-semibold shadow-lg hover:bg-green-700 transition-colors w-full sm:w-auto"
+                    className="flex items-center justify-center px-1 py-4 w-1/2 max-w-[140px] rounded-xl bg-green-600 text-white text-lg font-semibold shadow-lg hover:bg-green-700 transition-colors"
                     aria-label="I Know"
                   >
                     <Check size={28} />
                   </button>
                 </>
-              ) : (
-                <>
-                  <button
-                    onClick={(e) => handleDontKnow(e)}
-                    className="flex items-center justify-center px-8 py-4 rounded-full bg-red-600 text-white text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors w-full sm:w-auto"
-                    aria-label="I Don't Know"
-                  >
-                    <X size={24} className="mr-2" />
-                  </button>
-                  <button
-                    onClick={(e) => handleKnow(e)}
-                    className="flex items-center justify-center px-8 py-4 rounded-full bg-green-600 text-white text-lg font-semibold shadow-lg hover:bg-green-700 transition-colors w-full sm:w-auto"
-                    aria-label="I Know"
-                  >
-                    <Check size={24} className="mr-2" />
-                  </button>
-                </>
               )}
             </div>
-          </div>
-          <div className="text-center text-neutral-500 dark:text-neutral-400">
-            <p>{!isFlipped ? 'Tap to see translation • Swipe o usa los botones para responder' : 'Tap to return • Swipe o usa los botones para responder'}</p>
-            <ArrowRight className="mx-auto mt-2" size={20} />
+            <div className="text-center text-neutral-500 dark:text-neutral-400 select-none mt-2">
+              <p className="select-none">{!isFlipped ? 'Tap to see translation • Swipe o usa los botones para responder' : 'Tap to return • Swipe o usa los botones para responder'}</p>
+              <ArrowRight className="mx-auto mt-2" size={20} />
+            </div>
           </div>
         </div>
       </animated.div>

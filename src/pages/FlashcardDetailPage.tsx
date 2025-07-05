@@ -148,10 +148,10 @@ const FlashcardDetailPage: React.FC = () => {
                          utterance.lang = 'en-US';
                          window.speechSynthesis.speak(utterance);
                        }}
-                       className="p-1.5 text-neutral-500 dark:text-blue-300 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
+                       className="p-2.5 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                        aria-label="Pronounce word"
                      >
-                       <Volume2 size={24} />
+                       <Volume2 size={26} className="text-sky-600" />
                      </button>
                    </div>
                    {flashcard.englishSentence && (
@@ -164,10 +164,10 @@ const FlashcardDetailPage: React.FC = () => {
                            utterance.lang = 'en-US';
                            window.speechSynthesis.speak(utterance);
                          }}
-                         className="p-1.5 text-neutral-500 dark:text-blue-300 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
+                         className="p-2 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                          aria-label="Pronounce sentence"
                        >
-                         <Volume2 size={24} />
+                         <Volume2 size={22} className="text-sky-600" />
                        </button>
                      </div>
                    )}
@@ -195,10 +195,10 @@ const FlashcardDetailPage: React.FC = () => {
                                  window.speechSynthesis.speak(utterance);
                                }
                              }}
-                             className="p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900 rounded-full transition-colors duration-200"
+                             className="p-2.5 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                              aria-label={`Pronounce ${studyTargetLanguage === 'french' ? 'French translation' : 'Spanish translation'}`}
                            >
-                             <Volume2 size={24} />
+                             <Volume2 size={26} className="text-sky-600" />
                            </button>
                          </div>
                          {(studyTargetLanguage === 'french' ? flashcard.frenchSentence : flashcard.spanishSentence) && (
@@ -217,10 +217,10 @@ const FlashcardDetailPage: React.FC = () => {
                                    window.speechSynthesis.speak(utterance);
                                  }
                                }}
-                               className="p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900 rounded-full transition-colors duration-200"
+                               className="p-2 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                                aria-label={`Pronounce ${studyTargetLanguage === 'french' ? 'French sentence' : 'Spanish sentence'}`}
                              >
-                               <Volume2 size={24} />
+                               <Volume2 size={22} className="text-sky-600" />
                              </button>
                            </div>
                          )}

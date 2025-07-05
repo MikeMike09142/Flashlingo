@@ -110,19 +110,20 @@ const ProductionCard: React.FC<ProductionCardProps> = ({ flashcard, onKnow, onDo
   return (
     <div 
       onClick={handleFlip}
-      className={`transition-colors duration-300 relative w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto p-4 sm:p-6 rounded-2xl shadow-lg border-4 ${feedbackColor} cursor-pointer`}
+      className={`transition-colors duration-300 relative w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto rounded-2xl shadow-lg border-4 ${feedbackColor} cursor-pointer select-none min-h-[100dvh] flex flex-col justify-center items-center`}
+      style={{paddingBottom: 'env(safe-area-inset-bottom)'}}
     >
       {isFlipped ? (
-        <div className="flex flex-col items-center justify-center h-full text-center min-h-[280px]">
-          <h2 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100">{targetWord}</h2>
+        <div className="flex flex-col items-center justify-center flex-1 w-full text-center select-none">
+          <h2 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 select-none">{targetWord}</h2>
           {targetSentence && (
-              <p className="text-lg mt-2 italic text-neutral-600 dark:text-neutral-400">{targetSentence}</p>
+              <p className="text-lg mt-2 italic text-neutral-600 dark:text-neutral-400 select-none">{targetSentence}</p>
           )}
-          <p className="mt-8 text-sm text-neutral-500 dark:text-neutral-400">Toca para volver a intentar</p>
+          <p className="mt-8 text-sm text-neutral-500 dark:text-neutral-400 select-none">Toca para volver a intentar</p>
         </div>
       ) : (
         <>
-          <div className="flex flex-col items-center justify-center h-full text-center">
+          <div className="flex flex-col items-center justify-center flex-1 w-full text-center select-none">
             {/* Image */}
             {flashcard.imageUrl && (
               <img 
@@ -134,12 +135,12 @@ const ProductionCard: React.FC<ProductionCardProps> = ({ flashcard, onKnow, onDo
             
             {/* Dashed word hint */}
             <div 
-              className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4 tracking-widest text-neutral-700 dark:text-neutral-300" 
+              className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4 tracking-widest text-neutral-700 dark:text-neutral-300 select-none" 
               dangerouslySetInnerHTML={{ __html: getDashedWord() }} 
             />
             
             {/* Status text */}
-            <p className="h-8 text-neutral-500 dark:text-neutral-400 text-sm sm:text-base">
+            <p className="h-8 text-neutral-500 dark:text-neutral-400 text-sm sm:text-base select-none">
               {listening ? 'Escuchando...' : (transcript || 'Toca el micrófono para hablar')}
             </p>
           </div>
@@ -161,14 +162,14 @@ const ProductionCard: React.FC<ProductionCardProps> = ({ flashcard, onKnow, onDo
 
           {/* Feedback for incorrect answers */}
           {feedback === 'incorrect' && (
-            <div className="absolute top-4 right-4 text-sm font-bold text-red-500 bg-white dark:bg-neutral-800 px-2 py-1 rounded">
+            <div className="absolute top-4 right-4 text-sm font-bold text-red-500 bg-white dark:bg-neutral-800 px-2 py-1 rounded select-none">
               Correcto: {targetWord}
             </div>
           )}
 
           {/* Success feedback */}
           {feedback === 'correct' && (
-            <div className="absolute top-4 right-4 text-sm font-bold text-green-500 bg-white dark:bg-neutral-800 px-2 py-1 rounded">
+            <div className="absolute top-4 right-4 text-sm font-bold text-green-500 bg-white dark:bg-neutral-800 px-2 py-1 rounded select-none">
               ¡Correcto!
             </div>
           )}

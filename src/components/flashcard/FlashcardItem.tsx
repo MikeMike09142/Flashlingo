@@ -117,10 +117,10 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
                          <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 mr-2">{targetTranslation}</h2>
                          <button
                            onClick={(e) => handlePronunciation(e, targetTranslation || '', targetLang)}
-                           className="p-1 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
+                           className="p-2 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                            aria-label={`Pronounce ${targetLangName} translation`}
                          >
-                           <Volume2 size={20} />
+                           <Volume2 size={22} className="text-sky-600" />
                          </button>
                        </div>
                        {targetSentence && (
@@ -128,10 +128,10 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
                            <p className="text-neutral-600 dark:text-neutral-300 italic mr-2">{targetSentence}</p>
                            <button
                              onClick={(e) => handlePronunciation(e, targetSentence || '', targetLang)}
-                             className="p-1 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
+                             className="p-1.5 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                              aria-label={`Pronounce ${targetLangName} sentence`}
                            >
-                             <Volume2 size={20} />
+                             <Volume2 size={18} className="text-sky-600" />
                            </button>
                          </div>
                        )}
@@ -147,10 +147,10 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
                    <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 mr-2">{flashcard.englishWord}</h2>
                    <button
                      onClick={(e) => handlePronunciation(e, flashcard.englishWord, 'en-US')}
-                     className="p-1 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
+                     className="p-2 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                      aria-label="Pronounce word"
                    >
-                     <Volume2 size={20} />
+                     <Volume2 size={22} className="text-sky-600" />
                    </button>
                  </div>
                  {flashcard.englishSentence && (
@@ -158,10 +158,10 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
                      <p className="text-neutral-600 dark:text-neutral-300 italic mr-2">{flashcard.englishSentence}</p>
                      <button
                        onClick={(e) => handlePronunciation(e, flashcard.englishSentence || '', 'en-US')}
-                       className="p-1 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
+                       className="p-1.5 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                        aria-label="Pronounce sentence"
                      >
-                       <Volume2 size={20} />
+                       <Volume2 size={18} className="text-sky-600" />
                      </button>
                    </div>
                  )}

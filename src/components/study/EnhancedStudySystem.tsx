@@ -105,14 +105,14 @@ const EnhancedStudySystem: React.FC<{ onStartSession: (session: StudySession) =>
   };
 
   return (
-    <div className="space-y-6 md:space-y-8 p-2 md:p-4">
-      <div className="text-center">
-        <h1 className="text-3xl md:text-4xl font-bold text-neutral-800 dark:text-neutral-100">Study Dashboard</h1>
-        <p className="text-neutral-500 dark:text-neutral-400 mt-1">Your progress at a glance.</p>
+    <div className="space-y-6 md:space-y-8 p-2 md:p-4 select-none">
+      <div className="text-center select-none">
+        <h1 className="text-3xl md:text-4xl font-bold text-neutral-800 dark:text-neutral-100 select-none">Study Dashboard</h1>
+        <p className="text-neutral-500 dark:text-neutral-400 mt-1 select-none">Your progress at a glance.</p>
       </div>
 
-      <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl shadow-md">
-        <h2 className="text-xl font-semibold mb-4 text-center">Overall Progress</h2>
+      <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl shadow-md select-none">
+        <h2 className="text-xl font-semibold mb-4 text-center select-none">Overall Progress</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
           <div className="h-64 md:h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -124,35 +124,35 @@ const EnhancedStudySystem: React.FC<{ onStartSession: (session: StudySession) =>
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Overall Progress</h3>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2">
+          <div className="select-none">
+            <h3 className="text-lg font-semibold mb-2 select-none">Overall Progress</h3>
+            <ul className="space-y-2 select-none">
+              <li className="flex items-center gap-2 select-none">
                 <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: COLORS[0] }}></span>
-                <span className="font-bold">Learning</span>
-                <span className="ml-2 text-sm text-blue-400 font-bold">{progressStats.pieData[0].value}</span>
-                <span className="ml-1 text-sm text-neutral-400">Cards you haven't reviewed yet.</span>
+                <span className="font-bold select-none">Learning</span>
+                <span className="ml-2 text-sm text-blue-400 font-bold select-none">{progressStats.pieData[0].value}</span>
+                <span className="ml-1 text-sm text-neutral-400 select-none">Cards you haven't reviewed yet.</span>
               </li>
-              <li className="flex items-center gap-2">
+              <li className="flex items-center gap-2 select-none">
                 <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: COLORS[1] }}></span>
-                <span className="font-bold">Practicing</span>
-                <span className="ml-2 text-sm text-purple-400 font-bold">{progressStats.pieData[1].value}</span>
-                <span className="ml-1 text-sm text-neutral-400">Reviewed cards you need to practice.</span>
+                <span className="font-bold select-none">Practicing</span>
+                <span className="ml-2 text-sm text-purple-400 font-bold select-none">{progressStats.pieData[1].value}</span>
+                <span className="ml-1 text-sm text-neutral-400 select-none">Reviewed cards you need to practice.</span>
               </li>
-              <li className="flex items-start gap-2 flex-wrap">
+              <li className="flex items-start gap-2 flex-wrap select-none">
                 <span className="w-3 h-3 rounded-full inline-block mt-1" style={{ backgroundColor: COLORS[2] }}></span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1 flex-wrap">
-                    <span className="font-bold">Mastered</span>
-                    <span className="text-sm text-green-400 font-bold">{progressStats.mastered}</span>
-                    <span className="ml-1 text-sm text-neutral-400">You've passed the recognition test.</span>
+                <div className="flex-1 min-w-0 select-none">
+                  <div className="flex items-center gap-1 flex-wrap select-none">
+                    <span className="font-bold select-none">Mastered</span>
+                    <span className="text-sm text-green-400 font-bold select-none">{progressStats.mastered}</span>
+                    <span className="ml-1 text-sm text-neutral-400 select-none">You've passed the recognition test.</span>
                   </div>
                   {Object.keys(progressStats.masteredByLevel).length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1">
+                    <div className="flex flex-wrap gap-1 mt-1 select-none">
                       {Object.entries(progressStats.masteredByLevel).map(([level, count]) => (
                         <span
                           key={level}
-                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${LEVEL_COLORS[level] || 'bg-neutral-600/20 text-neutral-400'}`}
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium select-none ${LEVEL_COLORS[level] || 'bg-neutral-600/20 text-neutral-400'}`}
                         >
                           {level}: {count}
                         </span>
@@ -166,16 +166,16 @@ const EnhancedStudySystem: React.FC<{ onStartSession: (session: StudySession) =>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Study Hub</h2>
+      <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl shadow-md select-none">
+        <h2 className="text-xl font-semibold mb-4 select-none">Study Hub</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button onClick={() => handleStartSession('review', sessionDecks.reviewDeck)} disabled={sessionDecks.reviewDeck.length === 0} className="p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold disabled:bg-neutral-400 text-center"><h3 className="text-lg">Study Cards</h3><p>({sessionDecks.reviewDeck.length} cards)</p></button>
             <button onClick={() => handleStartSession('recognition', sessionDecks.recognitionDeck)} disabled={sessionDecks.recognitionDeck.length === 0} className="p-4 bg-purple-500 text-white rounded-lg hover:bg-purple-600 font-semibold disabled:bg-neutral-400 text-center"><h3 className="text-lg">Practice Recognition</h3><p>({sessionDecks.recognitionDeck.length} cards)</p></button>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Study by Category</h2>
+      <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl shadow-md select-none">
+        <h2 className="text-xl font-semibold mb-4 select-none">Study by Category</h2>
         <div className="space-y-2">
           {categories.map(category => {
             const categoryCards = flashcards.filter(c => c.categoryIds.includes(category.id));
@@ -186,11 +186,11 @@ const EnhancedStudySystem: React.FC<{ onStartSession: (session: StudySession) =>
             const isCompleted = progress === 100;
 
             return (
-              <div key={category.id} className="border dark:border-neutral-700 rounded-lg">
-                <button onClick={() => !isCompleted && setOpenCategory(openCategory === category.id ? null : category.id)} className={`w-full p-3 flex items-center justify-between ${isCompleted ? 'cursor-default' : ''}`}>
-                  <span className="font-semibold">{category.name} ({categoryCards.length})</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-neutral-500">{progress}% Mastered</span>
+              <div key={category.id} className="border dark:border-neutral-700 rounded-lg select-none">
+                <button onClick={() => !isCompleted && setOpenCategory(openCategory === category.id ? null : category.id)} className={`w-full p-3 flex items-center justify-between select-none ${isCompleted ? 'cursor-default' : ''}`}>
+                  <span className="font-semibold select-none">{category.name} ({categoryCards.length})</span>
+                  <div className="flex items-center gap-2 select-none">
+                    <span className="text-sm text-neutral-500 select-none">{progress}% Mastered</span>
                     {!isCompleted && <ChevronDown className={`transition-transform ${openCategory === category.id ? 'rotate-180' : ''}`} />}
                   </div>
                 </button>
