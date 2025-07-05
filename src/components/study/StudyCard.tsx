@@ -181,7 +181,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   const targetLangName = studyTargetLanguage === 'french' ? 'French' : 'Spanish';
 
   if (!isFlipped) return (
-    <div className="w-full relative swipe-container h-[100dvh] flex flex-col justify-center items-center overflow-hidden px-4" style={{paddingBottom: 'env(safe-area-inset-bottom)'}}>
+    <div className="flex flex-1 justify-center items-center w-full min-h-screen bg-neutral-900 px-2 sm:px-0 relative swipe-container overflow-hidden" style={{paddingBottom: 'env(safe-area-inset-bottom)'}}>
       {/* Swipe indicators */}
       <div className="absolute inset-0 pointer-events-none z-10">
         <div className={`absolute bottom-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
@@ -212,10 +212,8 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
           opacity,
           height: 'calc(100dvh - 100px)',
           minHeight: '400px',
-          width: '100%',
-          maxWidth: '400px',
         }}
-        className={`mx-auto self-center rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 flex flex-col items-center bg-white dark:bg-neutral-800`}
+        className={`w-full sm:max-w-[400px] mx-auto self-center rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 flex flex-col items-center bg-white dark:bg-neutral-800`}
         onClick={handleFlip}
         tabIndex={0}
         role="button"
@@ -297,7 +295,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   )
 
   return (
-    <div className="w-full relative swipe-container h-[100dvh] flex flex-col justify-center items-center overflow-hidden px-4" style={{paddingBottom: 'env(safe-area-inset-bottom)'}}>
+    <div className="flex flex-1 justify-center items-center w-full min-h-screen bg-neutral-900 px-2 sm:px-0 relative swipe-container overflow-hidden" style={{paddingBottom: 'env(safe-area-inset-bottom)'}}>
       {/* Swipe indicators */}
       <div className="absolute inset-0 pointer-events-none z-10">
         <div className={`absolute bottom-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
@@ -328,10 +326,8 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
           opacity,
           height: 'calc(100dvh - 100px)',
           minHeight: '400px',
-          width: '100%',
-          maxWidth: '400px',
         }}
-        className={`mx-auto self-center rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 flex flex-col items-center bg-white dark:bg-neutral-800`}
+        className={`w-full sm:max-w-[400px] mx-auto self-center rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 flex flex-col items-center bg-white dark:bg-neutral-800`}
         onClick={handleFlip}
         tabIndex={0}
         role="button"

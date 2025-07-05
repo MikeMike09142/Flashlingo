@@ -30,6 +30,17 @@ const ThemeManager: React.FC = () => {
 const App: React.FC = () => {
   const [showWelcome, setShowWelcome] = React.useState<boolean>(() => !localStorage.getItem('hasSeenWelcome'));
 
+  // Inicializar SpeechSynthesis al cargar la app para evitar delay en el primer audio
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+      // Reproducir un utterance vacío para "despertar" la voz
+      const utterance = new window.SpeechSynthesisUtterance(' ');
+      utterance.volume = 0;
+      window.speechSynthesis.speak(utterance);
+    }
+  }, []);
+
   if (showWelcome) {
     return (
       <>

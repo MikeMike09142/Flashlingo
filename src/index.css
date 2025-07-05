@@ -50,11 +50,16 @@
   --error-700: #b91c1c;
 }
 
-body {
+html, body {
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: #18181b;
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--cream-100);
 }
 
 .dark {

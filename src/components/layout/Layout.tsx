@@ -22,7 +22,7 @@ const Layout: React.FC = () => {
         <Sidebar isOpen={sidebarOpen} closeSidebar={closeSidebar} />
         
         <main className="flex-1 transition-all duration-300 md:ml-64">
-          <div className="container mx-auto p-4">
+          <div className="w-full px-2 sm:px-4">
             <Outlet />
           </div>
         </main>

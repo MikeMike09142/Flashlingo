@@ -494,17 +494,15 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
 
   return (
     <div
-      className="w-full flex flex-col justify-center items-center bg-transparent px-4"
+      className="flex flex-1 justify-center items-center w-full min-h-screen bg-neutral-900 px-2 sm:px-0"
       style={{
-        height: '100dvh',
-        boxSizing: 'border-box',
         paddingBottom: 'env(safe-area-inset-bottom)',
         overflow: 'hidden',
       }}
     >
       {/* Session Header */}
-      <div className="absolute top-0 left-0 right-0 mb-2 sm:mb-6 z-10 px-4">
-        <div className="flex items-center justify-between mb-2 sm:mb-4">
+      <div className="absolute top-0 left-0 right-0 mt-3 mb-2 sm:mb-6 z-10 w-full flex flex-col items-center px-4 sm:px-0">
+        <div className="flex items-center justify-center w-full mb-2 sm:mb-4">
           <button
             onClick={handleExitSession}
             className="text-sm text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
@@ -538,14 +536,14 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
         </div>
         
         {/* Progress Bar */}
-        <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-2">
+        <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-4 mt-2">
           <div 
             className="bg-blue-500 h-2 rounded-full transition-all duration-300"
             style={{ width: `${effectiveProgress}%` }}
           />
         </div>
         
-        <div className="flex items-center justify-between text-sm select-none">
+        <div className="flex items-center justify-between text-sm select-none mt-2">
           <span className="text-neutral-600 dark:text-neutral-400 select-none">
             Session {session.sessionNumber} of {session.totalSessions}
           </span>
@@ -567,10 +565,8 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
           WebkitTouchCallout: 'none',
           height: 'calc(100dvh - 200px)',
           minHeight: '400px',
-          width: '100%',
-          maxWidth: '400px',
         }}
-        className={`mx-auto self-center rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 select-none flex flex-col bg-white dark:bg-neutral-800`}
+        className={`w-full sm:max-w-[400px] mx-auto self-center rounded-xl shadow-sm overflow-hidden cursor-grab active:cursor-grabbing swipe-card transition-colors duration-200 select-none flex flex-col bg-white dark:bg-neutral-800`}
         tabIndex={0}
         role="button"
         aria-label="Tap to see translation"
