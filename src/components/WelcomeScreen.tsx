@@ -25,7 +25,6 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onFinish }) => {
     <div
       className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-blue-50 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-100 p-6 select-none"
       onClick={handleNext}
-      onTouchEnd={handleNext}
     >
       <div className="max-w-xs text-center text-lg font-medium leading-relaxed">
         {messages[index]}

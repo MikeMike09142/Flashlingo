@@ -14,6 +14,23 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
   const [isFlipped, setIsFlipped] = React.useState(false);
   const { toggleFavorite, deleteFlashcard, categories, studyTargetLanguage } = useAppContext();
   const navigate = useNavigate();
+  const [isFrenchVoiceAvailable, setIsFrenchVoiceAvailable] = React.useState(true);
+  
+  function hasLocalFrenchVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    return voices.some(voice => voice.lang.startsWith('fr') && voice.localService);
+  }
+
+  React.useEffect(() => {
+    function checkVoices() {
+      setIsFrenchVoiceAvailable(hasLocalFrenchVoice());
+    }
+    if (window.speechSynthesis.getVoices().length === 0) {
+      window.speechSynthesis.onvoiceschanged = checkVoices;
+    } else {
+      checkVoices();
+    }
+  }, [studyTargetLanguage]);
   
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -26,9 +43,25 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
   
   const handlePronunciation = (e: React.MouseEvent, text: string, lang: string) => {
     e.stopPropagation();
+    if (lang.startsWith('fr') && !isFrenchVoiceAvailable) {
+      return;
+    }
+    const synth = window.speechSynthesis;
+    const voices = synth.getVoices();
+    let selectedVoice = undefined;
+    if (lang.startsWith('fr')) {
+      selectedVoice = voices.find(voice => voice.lang.startsWith('fr') && voice.localService);
+    } else if (lang.startsWith('es')) {
+      selectedVoice = voices.find(voice => voice.lang.startsWith('es') && voice.localService);
+    } else if (lang.startsWith('en')) {
+      selectedVoice = voices.find(voice => voice.lang.startsWith('en') && voice.localService);
+    }
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
-    window.speechSynthesis.speak(utterance);
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+    synth.speak(utterance);
   };
   
   const handleEditClick = (e: React.MouseEvent) => {
@@ -109,7 +142,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
           {/* Content Section: Word/Translation and Sentence */}
           <div className="flex-1 flex flex-col justify-center items-center text-center overflow-y-auto">
             {isFlipped ? (
-              // Back side: Show Spanish translation
+              // Back side: Show Spanish/French translation
               <>
                  {targetTranslation ? (
                     <>
@@ -119,6 +152,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
                            onClick={(e) => handlePronunciation(e, targetTranslation || '', targetLang)}
                            className="p-2 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                            aria-label={`Pronounce ${targetLangName} translation`}
+                           disabled={studyTargetLanguage === 'french' && !isFrenchVoiceAvailable}
                          >
                            <Volume2 size={22} className="text-sky-600" />
                          </button>
@@ -130,9 +164,19 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onSelect }) =>
                              onClick={(e) => handlePronunciation(e, targetSentence || '', targetLang)}
                              className="p-1.5 bg-sky-500/20 hover:bg-sky-500/30 rounded-full transition-colors duration-200"
                              aria-label={`Pronounce ${targetLangName} sentence`}
+                             disabled={studyTargetLanguage === 'french' && !isFrenchVoiceAvailable}
                            >
                              <Volume2 size={18} className="text-sky-600" />
                            </button>
+                         </div>
+                       )}
+                       {/* Mensaje de ayuda en inglés si no hay voz francesa */}
+                       {studyTargetLanguage === 'french' && !isFrenchVoiceAvailable && (
+                         <div className="mt-2 text-sm text-red-600 dark:text-red-400">
+                           French voice is not available on your device. To hear French pronunciation, please install a French voice in your device settings. <br />
+                           <b>Windows:</b> Settings &gt; Time &amp; Language &gt; Language &gt; Add a language &gt; French &gt; Options &gt; Download voice.<br />
+                           <b>Android:</b> Settings &gt; System &gt; Languages &amp; input &gt; Text-to-speech &gt; Install French voice.<br />
+                           <b>iOS:</b> Settings &gt; General &gt; Language &amp; Region &gt; Add language &gt; French.
                          </div>
                        )}
                     </>

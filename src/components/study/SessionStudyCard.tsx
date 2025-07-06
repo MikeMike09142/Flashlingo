@@ -501,8 +501,8 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
       }}
     >
       {/* Session Header */}
-      <div className="absolute top-0 left-0 right-0 mt-3 mb-2 sm:mb-6 z-10 w-full flex flex-col items-center px-4 sm:px-0">
-        <div className="flex items-center justify-center w-full mb-2 sm:mb-4">
+      <div className="absolute top-0 left-0 right-0 mt-3 mb-2 z-10 w-full flex flex-col items-center px-2 sm:px-4 md:px-0 md:mt-6 md:mb-8 md:space-y-2">
+        <div className="flex items-center justify-center w-full mb-2 md:mb-6">
           <button
             onClick={handleExitSession}
             className="text-sm text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
@@ -573,64 +573,64 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
         onClick={handleFlip}
       >
         <div className="w-full h-full flex flex-col items-center gap-y-2 bg-white dark:bg-neutral-800 p-2 sm:p-6 rounded-xl select-none">
-          {(sessionMode !== 'image' || showImages) && currentCard.imageUrl && (
+            {(sessionMode !== 'image' || showImages) && currentCard.imageUrl && (
             <div className="mb-2 sm:mb-4 w-40 h-40 sm:w-60 sm:h-60 rounded-lg overflow-hidden">
-              <ImageWithFallback
-                src={currentCard.imageUrl}
-                alt={word}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-          {showText && (
+                <ImageWithFallback
+                  src={currentCard.imageUrl}
+                  alt={word}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            {showText && (
             <div className="text-center select-none">
               <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 select-none truncate">{word}</h2>
-            </div>
-          )}
+              </div>
+            )}
           <div className="text-center select-none">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                const utterance = new SpeechSynthesisUtterance(word);
-                utterance.lang = lang;
-                window.speechSynthesis.speak(utterance);
-              }}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const utterance = new SpeechSynthesisUtterance(word);
+                  utterance.lang = lang;
+                  window.speechSynthesis.speak(utterance);
+                }}
               className="p-3 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
-            >
+              >
               <Volume2 size={24} className="text-sky-600" />
-            </button>
-          </div>
-          {showText && sentence && (
+              </button>
+            </div>
+            {showText && sentence && (
             <div className="mt-2 sm:mt-4 text-center select-none">
               <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mb-1 sm:mb-2 select-none break-words">{sentence}</p>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const utterance = new SpeechSynthesisUtterance(sentence);
-                  utterance.lang = lang;
-                  window.speechSynthesis.speak(utterance);
-                }}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const utterance = new SpeechSynthesisUtterance(sentence);
+                    utterance.lang = lang;
+                    window.speechSynthesis.speak(utterance);
+                  }}
                 className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
-              >
+                >
                 <Volume2 size={20} className="text-sky-600" />
-              </button>
-            </div>
-          )}
-          {!showText && sentence && (
+                </button>
+              </div>
+            )}
+            {!showText && sentence && (
             <div className="mt-4 text-center select-none">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const utterance = new SpeechSynthesisUtterance(sentence);
-                  utterance.lang = lang;
-                  window.speechSynthesis.speak(utterance);
-                }}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const utterance = new SpeechSynthesisUtterance(sentence);
+                    utterance.lang = lang;
+                    window.speechSynthesis.speak(utterance);
+                  }}
                 className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
-              >
+                >
                 <Volume2 size={18} className="text-sky-600" />
-              </button>
-            </div>
-          )}
+                </button>
+              </div>
+            )}
           {/* Botones de acción + instrucciones */}
           <div className="w-full">
             <div className="flex flex-row justify-between gap-4 mt-2 w-[320px] max-w-full mx-auto">
@@ -662,9 +662,9 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
               )}
             </div>
             <div className="text-center text-neutral-500 dark:text-neutral-400 select-none mt-2">
-              <p className="select-none">{!isFlipped ? 'Tap to see translation • Swipe o usa los botones para responder' : 'Tap to return • Swipe o usa los botones para responder'}</p>
+              <p className="select-none">{!isFlipped ? 'Tap to see translation • Swipe or use the buttons to answer' : 'Tap to return • Swipe or use the buttons to answer'}</p>
               <ArrowRight className="mx-auto mt-2" size={20} />
-            </div>
+          </div>
           </div>
         </div>
       </animated.div>

@@ -2,6 +2,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 
 const execAsync = promisify(exec);
 
@@ -32,21 +33,18 @@ async function optimizeAllImages() {
       return;
     }
 
-    // Optimizar todas las imágenes
-    const command = `imagemin ${IMAGES_DIR}/* --out-dir=${IMAGES_DIR} --plugin=jpegtran --plugin=pngquant`;
-    
-    console.log('⏳ Optimizando imágenes...');
-    const { stdout, stderr } = await execAsync(command);
-    
-    if (stderr) {
-      console.log(`⚠️  Advertencias: ${stderr}`);
+    // Eliminar la optimización con imagemin, solo usar sharp
+    // Forzar compresión y redimensionado de todas las imágenes
+    for (const file of imageFiles) {
+      const filePath = path.join(IMAGES_DIR, file);
+      console.log(`🔧 Forzando compresión y redimensionado de ${file}...`);
+      await sharp(filePath)
+        .resize({ width: 900, withoutEnlargement: true })
+        .jpeg({ quality: 70 })
+        .toFile(filePath + '.tmp');
+      fs.renameSync(filePath + '.tmp', filePath);
+      console.log(`✅ ${file} comprimida y redimensionada.`);
     }
-    
-    console.log('✅ ¡Optimización completada!');
-    console.log('📋 Imágenes optimizadas:');
-    imageFiles.forEach(file => {
-      console.log(`   - ${file}`);
-    });
     
   } catch (error) {
     console.error('❌ Error durante la optimización:', error.message);

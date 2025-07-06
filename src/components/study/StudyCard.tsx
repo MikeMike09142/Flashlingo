@@ -236,11 +236,11 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
             <div className="flex flex-col items-center">
               {flashcard.imageUrl && (
                 <div className="mb-2 sm:mb-4 w-40 h-40 sm:w-60 sm:h-60 rounded-lg overflow-hidden">
-                  <ImageWithFallback
-                    src={flashcard.imageUrl}
+                <ImageWithFallback
+                  src={flashcard.imageUrl}
                     alt={flashcard.englishWord}
                     className="w-full h-full object-cover"
-                  />
+                />
                 </div>
               )}
               <div className="text-center select-none">
