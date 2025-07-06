@@ -544,9 +544,7 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
         </div>
         
         <div className="flex items-center justify-between text-sm select-none mt-2">
-          <span className="text-neutral-600 dark:text-neutral-400 select-none">
-            Session {session.sessionNumber} of {session.totalSessions}
-          </span>
+          {/* Eliminar la línea que muestra el número de sesión */}
         </div>
       </div>
 
@@ -587,49 +585,64 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
               <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 select-none truncate">{word}</h2>
               </div>
             )}
-          <div className="text-center select-none">
+          <div className="text-center select-none flex flex-row items-center justify-center gap-2 mt-6">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = lang;
+                window.speechSynthesis.speak(utterance);
+              }}
+              className="p-3 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
+              aria-label="Pronounce word"
+            >
+              <Volume2 size={24} className="text-sky-600" />
+            </button>
+            <button
+              onClick={e => {
+                e.stopPropagation();
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = lang;
+                utterance.rate = 0.5;
+                window.speechSynthesis.speak(utterance);
+              }}
+              className="p-3 rounded-full bg-blue-200 hover:bg-blue-300 transition-colors ml-1"
+              aria-label="Pronounce word slowly"
+              title="Slow audio"
+            >
+              <span role="img" aria-label="slow">🐌</span>
+            </button>
+          </div>
+            {sentence && (
+            <div className="mt-4 text-center select-none flex flex-row items-center justify-center gap-2">
+              <p className="text-base sm:text-lg text-neutral-600 dark:text-neutral-400 mb-1 sm:mb-2 select-none break-words">{showText ? sentence : ''}</p>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  const utterance = new SpeechSynthesisUtterance(word);
+                  const utterance = new SpeechSynthesisUtterance(sentence);
                   utterance.lang = lang;
                   window.speechSynthesis.speak(utterance);
                 }}
-              className="p-3 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
+                className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
+                aria-label="Pronounce sentence"
               >
-              <Volume2 size={24} className="text-sky-600" />
+                <Volume2 size={20} className="text-sky-600" />
+              </button>
+              <button
+                onClick={e => {
+                  e.stopPropagation();
+                  const utterance = new SpeechSynthesisUtterance(sentence);
+                  utterance.lang = lang;
+                  utterance.rate = 0.5;
+                  window.speechSynthesis.speak(utterance);
+                }}
+                className="p-2.5 rounded-full bg-blue-200 hover:bg-blue-300 transition-colors ml-1"
+                aria-label="Pronounce sentence slowly"
+                title="Slow audio"
+              >
+                <span role="img" aria-label="slow">🐌</span>
               </button>
             </div>
-            {showText && sentence && (
-            <div className="mt-2 sm:mt-4 text-center select-none">
-              <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mb-1 sm:mb-2 select-none break-words">{sentence}</p>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const utterance = new SpeechSynthesisUtterance(sentence);
-                    utterance.lang = lang;
-                    window.speechSynthesis.speak(utterance);
-                  }}
-                className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
-                >
-                <Volume2 size={20} className="text-sky-600" />
-                </button>
-              </div>
-            )}
-            {!showText && sentence && (
-            <div className="mt-4 text-center select-none">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const utterance = new SpeechSynthesisUtterance(sentence);
-                    utterance.lang = lang;
-                    window.speechSynthesis.speak(utterance);
-                  }}
-                className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
-                >
-                <Volume2 size={18} className="text-sky-600" />
-                </button>
-              </div>
             )}
           {/* Botones de acción + instrucciones */}
           <div className="w-full">
@@ -662,7 +675,7 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
               )}
             </div>
             <div className="text-center text-neutral-500 dark:text-neutral-400 select-none mt-2">
-              <p className="select-none">{!isFlipped ? 'Tap to see translation • Swipe or use the buttons to answer' : 'Tap to return • Swipe or use the buttons to answer'}</p>
+              <p className="select-none text-xs sm:text-sm">{!isFlipped ? 'Tap to see translation • Swipe or use the buttons to answer' : 'Tap to return • Swipe or use the buttons to answer'}</p>
               <ArrowRight className="mx-auto mt-2" size={20} />
           </div>
           </div>
