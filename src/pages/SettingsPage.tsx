@@ -83,6 +83,15 @@ const SettingsPage: React.FC = () => {
                 If you clear your browser data, all your progress will be lost.
               </p>
             </div>
+
+            {studyTargetLanguage === 'french' && (
+              <div className="mt-4 text-sm text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500 bg-blue-900 rounded p-3">
+                <b>If you don't have French voice in your device:</b> To hear French pronunciation, please install a French voice in your device settings.<br />
+                <b>Windows:</b> Settings &gt; Time &amp; Language &gt; Language &gt; Add a language &gt; French &gt; Options &gt; Download voice.<br />
+                <b>Android:</b> Settings &gt; System &gt; Languages &amp; input &gt; Text-to-speech &gt; Install French voice.<br />
+                <b>iOS:</b> Settings &gt; General &gt; Language &amp; Region &gt; Add language &gt; French.
+              </div>
+            )}
           </div>
         </div>
         
