@@ -44,7 +44,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Solicita permiso de notificaciones push al cargar la app
-    requestNotificationPermission("BP8Cs5f7FOuYwWub76EhOv9_bYmgSdyURf8vu-LhX26NXWK_jenzKSujh4QTudoSK9Bs7Z52HBpIWgFzo213RvI");
+    requestNotificationPermission("BP8Cs5f7FOuYwWub76EhOv9_bYmgSdyURf8vu-LhX26NXWK_jenzKSujh4QTudoSK9Bs7Z52HBpIWgFzo213Rvl");
   }, []);
 
   if (showWelcome) {
