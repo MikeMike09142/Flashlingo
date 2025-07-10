@@ -8,7 +8,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.google.com https://www.google-analytics.com https://*.gstatic.com data: blob: ws://localhost:* ws://127.0.0.1:* ws://0.0.0.0:*; img-src 'self' https://*.googleapis.com https://*.gstatic.com *.google.com *.googleusercontent.com data:; frame-src *.google.com;"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.google.com https://www.google-analytics.com https://*.gstatic.com data: blob: ws://localhost:* ws://127.0.0.1:* ws://0.0.0.0:*; img-src 'self' https://*.googleapis.com https://*.gstatic.com *.google.com *.googleusercontent.com data:; frame-src *.google.com;"
         }
       ]
     }
