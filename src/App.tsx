@@ -11,7 +11,6 @@ import FlashcardDetailPage from './pages/FlashcardDetailPage';
 import CategoryFormPage from './pages/CategoryFormPage';
 import AchievementsPage from './pages/AchievementsPage';
 import WelcomeScreen from './components/WelcomeScreen';
-import { requestNotificationPermission } from './firebase';
 
 // Componente para manejar el tema
 const ThemeManager: React.FC = () => {
@@ -40,11 +39,6 @@ const App: React.FC = () => {
       utterance.volume = 0;
       window.speechSynthesis.speak(utterance);
     }
-  }, []);
-
-  useEffect(() => {
-    // Solicita permiso de notificaciones push al cargar la app
-    requestNotificationPermission("BP8Cs5f7FOuYwWub76EhOv9_bYmgSdyURf8vu-LhX26NXWK_jenzKSujh4QTudoSK9Bs7Z52HBpIWgFzo213Rvl");
   }, []);
 
   if (showWelcome) {

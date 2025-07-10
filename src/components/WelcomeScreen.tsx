@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { requestNotificationPermission } from '../firebase';
 
 interface WelcomeScreenProps {
   onFinish: () => void;
@@ -10,8 +9,6 @@ const messages = [
   'Swipe through images, listen to audio, and master new words.',
   'Track your progress anywhere – even offline. Let\'s get started!'
 ];
-
-const VAPID_KEY = "BP8Cs5f7FOuYwWub76EhOv9_bYmgSdyURf8vu-LhX26NXWK_jenzKSujh4QTudoSK9Bs7Z52HBpIWgFzo213RvI";
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onFinish }) => {
   const [index, setIndex] = useState(0);
