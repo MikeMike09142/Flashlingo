@@ -84,7 +84,7 @@ const HomePage: React.FC = () => {
   };
 
   const handleAllowNotifications = async () => {
-    await requestNotificationPermission("BP8Cs5f7FOuYwWub76EhOv9_bYmgSdyURf8vu-LhX26NXWK_jenzKSujh4QTudoSK9Bs7Z52HBpIWgFzo213Rvl");
+    await requestNotificationPermission("BP8Cs5f7FOuYwWub76EhOv9_bYmgSdyURf8vu-LhX26NXWK_jenzKSujh4QTudoSK9Bs7Z52HBplWgFzo213Rvl");
     setNotificationPermission(Notification.permission);
   };
 
