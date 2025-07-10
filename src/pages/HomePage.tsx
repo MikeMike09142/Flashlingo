@@ -4,6 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import { Plus, Search, BookOpen, ChevronDown, Download, Upload } from 'lucide-react';
 import FlashcardItem from '../components/flashcard/FlashcardItem';
 import { LanguageLevel, Flashcard } from '../types';
+import { requestNotificationPermission } from '../firebase';
 
 const HomePage: React.FC = () => {
   const {
@@ -24,6 +25,7 @@ const HomePage: React.FC = () => {
 
   const [isLevelDropdownOpen, setIsLevelDropdownOpen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState<LanguageLevel | null>(null);
+  const [notificationPermission, setNotificationPermission] = useState(Notification.permission);
 
   useEffect(() => {
     setSearchTerm('');
@@ -81,6 +83,11 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const handleAllowNotifications = async () => {
+    await requestNotificationPermission("BP8Cs5f7FOuYwWub76EhOv9_bYmgSdyURf8vu-LhX26NXWK_jenzKSujh4QTudoSK9Bs7Z52HBpIWgFzo213Rvl");
+    setNotificationPermission(Notification.permission);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -91,6 +98,17 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Botón para permitir notificaciones push */}
+      {notificationPermission !== 'granted' && (
+        <div className="mb-4 flex justify-end">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            onClick={handleAllowNotifications}
+          >
+            Allow Notifications
+          </button>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
         <h1 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">My Flashcards</h1>
         <div className="flex items-center flex-wrap justify-start md:justify-end gap-2">
