@@ -41,12 +41,6 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onFinish }) => {
         ))}
       </div>
       <p className="mt-6 text-sm text-neutral-600 dark:text-neutral-400">Tap or swipe to continue</p>
-      <button
-        onClick={() => requestNotificationPermission(VAPID_KEY)}
-        style={{ marginTop: 16, padding: '8px 16px', background: '#2563eb', color: 'white', border: 'none', borderRadius: 4 }}
-      >
-        Allow Notifications
-      </button>
     </div>
   );
 };
