@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import BulkImport from '../components/import/BulkImport';
+import { OneSignalNotification } from '../components/OneSignalNotification';
 
 const SettingsPage: React.FC = () => {
   const { 
@@ -71,6 +72,13 @@ const SettingsPage: React.FC = () => {
                     Enable Card Change Sound
                   </label>
                 </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-medium text-neutral-700 dark:text-neutral-200 mb-2">Notifications</h3>
+              <div className="mt-2">
+                <OneSignalNotification />
               </div>
             </div>
             
