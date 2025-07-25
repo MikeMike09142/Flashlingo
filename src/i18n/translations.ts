@@ -43,9 +43,10 @@ export const translations = {
     englishSentence: 'English Sentence',
     spanishSentence: 'Spanish Sentence',
     frenchSentence: 'French Sentence',
-    selectCategories: 'Select Categories',
-    selectLevel: 'Select Level',
-    imageUrl: 'Image URL (optional)',
+    imageUrl: 'Image URL',
+    categories: 'Categories',
+    level: 'Level',
+    favorite: 'Favorite',
     save: 'Save',
     cancel: 'Cancel',
     
@@ -56,28 +57,54 @@ export const translations = {
     delete: 'Delete',
     edit: 'Edit',
     close: 'Close',
-    confirm: 'Confirm',
     
     // Levels
-    level: 'Level',
-    beginner: 'Beginner',
-    elementary: 'Elementary',
-    intermediate: 'Intermediate',
-    upperIntermediate: 'Upper Intermediate',
-    advanced: 'Advanced',
-    proficient: 'Proficient',
+    levelA1: 'Beginner (A1)',
+    levelA2: 'Elementary (A2)',
+    levelB1: 'Intermediate (B1)',
+    levelB2: 'Upper Intermediate (B2)',
+    levelC1: 'Advanced (C1)',
+    levelC2: 'Proficient (C2)',
     
     // Settings
     language: 'Language',
     theme: 'Theme',
     lightMode: 'Light Mode',
     darkMode: 'Dark Mode',
-    systemDefault: 'System Default',
     
-    // Study modes
+    // Study Modes
     flashcardMode: 'Flashcard Mode',
-    quizMode: 'Quiz Mode',
-    reviewMode: 'Review Mode',
+    recognitionMode: 'Recognition Mode',
+    imageMode: 'Image Mode',
+    
+    // Welcome Screen
+    welcomeMessage1: 'Welcome to FlashLingo! Boost your vocabulary with fun flashcards.',
+    welcomeMessage2: 'Swipe through images, listen to audio, and master new words.',
+    welcomeMessage3: 'Track your progress anywhere – even offline. Let\'s get started!',
+    tapToContinue: 'Tap or swipe to continue',
+    
+    // HomePage
+    myFlashcards: 'My Flashcards',
+    addFlashcard: 'Add Flashcard',
+    allLevels: 'All Levels',
+    newestFirst: 'Newest First',
+    oldestFirst: 'Oldest First',
+    alphabetical: 'Alphabetical',
+    loadingData: 'Loading data...',
+    
+    // FlashcardForm
+    backToAllCards: 'Back to all cards',
+    createNewFlashcard: 'Create New Flashcard',
+    englishWordRequired: 'English word is required',
+    spanishTranslationRequired: 'Spanish translation is required',
+    preview: 'Preview',
+    
+    // FlashcardList
+    noFlashcardsFound: 'No flashcards found',
+    
+    // Import/Export
+    flashcardsImportedSuccessfully: 'Flashcards imported successfully!',
+    failedToImportFlashcards: 'Failed to import flashcards. Please check the file format.',
   },
   es: {
     // Navigation
@@ -123,9 +150,10 @@ export const translations = {
     englishSentence: 'Oración en Inglés',
     spanishSentence: 'Oración en Español',
     frenchSentence: 'Oración en Francés',
-    selectCategories: 'Seleccionar Categorías',
-    selectLevel: 'Seleccionar Nivel',
-    imageUrl: 'URL de Imagen (opcional)',
+    imageUrl: 'URL de Imagen',
+    categories: 'Categorías',
+    level: 'Nivel',
+    favorite: 'Favorito',
     save: 'Guardar',
     cancel: 'Cancelar',
     
@@ -136,28 +164,54 @@ export const translations = {
     delete: 'Eliminar',
     edit: 'Editar',
     close: 'Cerrar',
-    confirm: 'Confirmar',
     
     // Levels
-    level: 'Nivel',
-    beginner: 'Principiante',
-    elementary: 'Elemental',
-    intermediate: 'Intermedio',
-    upperIntermediate: 'Intermedio Superior',
-    advanced: 'Avanzado',
-    proficient: 'Competente',
+    levelA1: 'Principiante (A1)',
+    levelA2: 'Elemental (A2)',
+    levelB1: 'Intermedio (B1)',
+    levelB2: 'Intermedio Alto (B2)',
+    levelC1: 'Avanzado (C1)',
+    levelC2: 'Competente (C2)',
     
     // Settings
     language: 'Idioma',
     theme: 'Tema',
     lightMode: 'Modo Claro',
     darkMode: 'Modo Oscuro',
-    systemDefault: 'Predeterminado del Sistema',
     
-    // Study modes
+    // Study Modes
     flashcardMode: 'Modo Tarjetas',
-    quizMode: 'Modo Quiz',
-    reviewMode: 'Modo Repaso',
+    recognitionMode: 'Modo Reconocimiento',
+    imageMode: 'Modo Imagen',
+    
+    // Welcome Screen
+    welcomeMessage1: '¡Bienvenido a FlashLingo! Mejora tu vocabulario con tarjetas divertidas.',
+    welcomeMessage2: 'Desliza por imágenes, escucha audio y domina nuevas palabras.',
+    welcomeMessage3: 'Sigue tu progreso en cualquier lugar, incluso sin conexión. ¡Empecemos!',
+    tapToContinue: 'Toca o desliza para continuar',
+    
+    // HomePage
+    myFlashcards: 'Mis Tarjetas',
+    addFlashcard: 'Agregar Tarjeta',
+    allLevels: 'Todos los Niveles',
+    newestFirst: 'Más Recientes',
+    oldestFirst: 'Más Antiguos',
+    alphabetical: 'Alfabético',
+    loadingData: 'Cargando datos...',
+    
+    // FlashcardForm
+    backToAllCards: 'Volver a todas las tarjetas',
+    createNewFlashcard: 'Crear Nueva Tarjeta',
+    englishWordRequired: 'La palabra en inglés es requerida',
+    spanishTranslationRequired: 'La traducción al español es requerida',
+    preview: 'Vista Previa',
+    
+    // FlashcardList
+    noFlashcardsFound: 'No se encontraron tarjetas',
+    
+    // Import/Export
+    flashcardsImportedSuccessfully: '¡Tarjetas importadas exitosamente!',
+    failedToImportFlashcards: 'Error al importar tarjetas. Por favor verifica el formato del archivo.',
   }
 };
 

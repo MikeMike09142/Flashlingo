@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import { useTranslation } from '../hooks/useTranslation';
 import { Plus, Search, BookOpen, ChevronDown, Download, Upload } from 'lucide-react';
 import FlashcardItem from '../components/flashcard/FlashcardItem';
 import { LanguageLevel, Flashcard } from '../types';
 
 const HomePage: React.FC = () => {
+  const { t } = useTranslation();
   const {
     filteredFlashcards,
     categories,
@@ -69,13 +71,13 @@ const HomePage: React.FC = () => {
               );
               return [...prev, ...newOnes];
             });
-            alert('Flashcards imported successfully!');
+            alert(t('flashcardsImportedSuccessfully'));
           } else {
             throw new Error('Invalid file format.');
           }
         } catch (error) {
           console.error("Error importing flashcards:", error);
-          alert('Failed to import flashcards. Please check the file format.');
+          alert(t('failedToImportFlashcards'));
         }
       };
     }
@@ -84,7 +86,7 @@ const HomePage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen dark:bg-gray-900 text-gray-900 dark:text-white">
-        Cargando datos...
+        {t('loadingData')}
       </div>
     );
   }
@@ -92,14 +94,14 @@ const HomePage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
-        <h1 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">My Flashcards</h1>
+        <h1 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{t('myFlashcards')}</h1>
         <div className="flex items-center flex-wrap justify-start md:justify-end gap-2">
           <Link
             to="/flashcards/new"
             className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
           >
             <Plus className="w-5 h-5 mr-2" />
-            Add Flashcard
+            {t('addFlashcard')}
           </Link>
         </div>
       </div>
@@ -109,7 +111,7 @@ const HomePage: React.FC = () => {
         <div className="relative">
           <input
             type="text"
-            placeholder="Search flashcards..."
+            placeholder={t('searchFlashcards')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 pl-10 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -126,7 +128,7 @@ const HomePage: React.FC = () => {
               onClick={toggleLevelDropdown}
             >
               <BookOpen className="w-5 h-5 mr-2 text-neutral-400" />
-              {selectedLevel ? `Level ${selectedLevel}` : 'All Levels'}
+              {selectedLevel ? `${t('level')} ${selectedLevel}` : t('allLevels')}
               <ChevronDown className={`w-4 h-4 ml-2 text-neutral-400 transform transition-transform ${isLevelDropdownOpen ? 'rotate-180' : 'rotate-0'}`} />
             </button>
             {isLevelDropdownOpen && (
@@ -135,7 +137,7 @@ const HomePage: React.FC = () => {
                   className="w-full px-4 py-2 text-left hover:bg-neutral-50"
                   onClick={() => handleLevelChange(null)}
                 >
-                  All Levels
+                  {t('allLevels')}
                 </button>
                 {(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as LanguageLevel[]).map(level => (
                   <button
@@ -143,7 +145,7 @@ const HomePage: React.FC = () => {
                     className="w-full px-4 py-2 text-left hover:bg-neutral-50"
                     onClick={() => handleLevelChange(level)}
                   >
-                    Level {level}
+                    {t('level')} {level}
                   </button>
                 ))}
               </div>
@@ -156,9 +158,9 @@ const HomePage: React.FC = () => {
             onChange={(e) => setSortOption(e.target.value as any)}
             className="px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="alphabetical">Alphabetical</option>
+            <option value="newest">{t('newestFirst')}</option>
+            <option value="oldest">{t('oldestFirst')}</option>
+            <option value="alphabetical">{t('alphabetical')}</option>
           </select>
         </div>
       </div>

@@ -1,17 +1,19 @@
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface WelcomeScreenProps {
   onFinish: () => void;
 }
 
-const messages = [
-  'Welcome to FlashLingo! Boost your vocabulary with fun flashcards.',
-  'Swipe through images, listen to audio, and master new words.',
-  'Track your progress anywhere – even offline. Let\'s get started!'
-];
-
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onFinish }) => {
+  const { t } = useTranslation();
   const [index, setIndex] = useState(0);
+
+  const messages = [
+    t('welcomeMessage1'),
+    t('welcomeMessage2'),
+    t('welcomeMessage3')
+  ];
 
   const handleNext = useCallback(() => {
     if (index < messages.length - 1) {
@@ -19,7 +21,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onFinish }) => {
     } else {
       onFinish();
     }
-  }, [index, onFinish]);
+  }, [index, onFinish, messages.length]);
 
   return (
     <div
@@ -37,9 +39,9 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onFinish }) => {
           />
         ))}
       </div>
-      <p className="mt-6 text-sm text-neutral-600 dark:text-neutral-400">Tap or swipe to continue</p>
+      <p className="mt-6 text-sm text-neutral-600 dark:text-neutral-400">{t('tapToContinue')}</p>
     </div>
   );
 };
 
-export default WelcomeScreen; 
+export default WelcomeScreen;

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import { useTranslation } from '../hooks/useTranslation';
 import { ArrowLeft, Image, Plus, X } from 'lucide-react';
 import { Flashcard, LanguageLevel } from '../types/index';
 
@@ -97,11 +98,11 @@ const FlashcardFormPage: React.FC = () => {
     const newErrors: Partial<FormData> = {};
     
     if (!formData.englishWord.trim()) {
-      newErrors.englishWord = 'English word is required';
+      newErrors.englishWord = t('englishWordRequired');
     }
     
     if (!formData.spanishTranslation.trim()) {
-      newErrors.spanishTranslation = 'Spanish translation is required';
+      newErrors.spanishTranslation = t('spanishTranslationRequired');
     }
     
     setErrors(newErrors);
@@ -153,14 +154,14 @@ const FlashcardFormPage: React.FC = () => {
           className="inline-flex items-center text-neutral-600 dark:text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-100 transition-colors duration-200"
         >
           <ArrowLeft size={18} className="mr-1" />
-          Back to all cards
+          {t('backToAllCards')}
         </Link>
       </div>
       
       <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm overflow-hidden">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100 mb-6">
-            {isEditing ? 'Edit Flashcard' : 'Create New Flashcard'}
+            {isEditing ? t('editFlashcard') : t('createNewFlashcard')}
           </h1>
           
           <form onSubmit={handleSubmit} noValidate>
