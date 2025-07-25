@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Menu, X, Search, Plus, Sun, Moon } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -10,6 +11,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   const { searchTerm, setSearchTerm, theme, toggleTheme } = useAppContext();
+  const { t } = useTranslation();
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const navigate = useNavigate();
   
@@ -31,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
           <button
             onClick={toggleSidebar}
             className="mr-4 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors duration-200 md:hidden"
-            aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+            aria-label={sidebarOpen ? t('closeMenu') : t('openMenu')}
           >
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -49,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search flashcards..."
+                placeholder={t('searchPlaceholder')}
                 className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-800 dark:text-neutral-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 autoFocus
               />
@@ -65,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
               <button
                 onClick={handleSearchToggle}
                 className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors duration-200"
-                aria-label="Search"
+                aria-label={t('search')}
               >
                 <Search size={20} className="text-neutral-600 dark:text-neutral-300" />
               </button>
@@ -73,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors duration-200"
-                aria-label={theme.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                aria-label={theme.isDarkMode ? t('switchToLightMode') : t('switchToDarkMode')}
               >
                 {theme.isDarkMode ? (
                   <Sun size={20} className="text-neutral-600 dark:text-neutral-300" />

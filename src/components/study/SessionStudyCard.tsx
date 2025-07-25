@@ -572,7 +572,7 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
       >
         <div className="w-full h-full flex flex-col items-center gap-y-2 bg-white dark:bg-neutral-800 p-2 sm:p-6 rounded-xl select-none">
             {(sessionMode !== 'image' || showImages) && currentCard.imageUrl && (
-            <div className="mb-2 sm:mb-4 w-40 h-40 sm:w-60 sm:h-60 rounded-lg overflow-hidden">
+            <div className="mb-2 sm:mb-4 w-40 h-40 sm:w-60 sm:h-60 rounded-lg overflow-hidden study-card-image">
                 <ImageWithFallback
                   src={currentCard.imageUrl}
                   alt={word}
@@ -685,4 +685,4 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
   );
 };
 
-export default SessionStudyCard; 
+export default SessionStudyCard;

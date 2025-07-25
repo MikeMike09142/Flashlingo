@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import * as LucideIcons from 'lucide-react';
 import { BookOpen, Star, Check, BarChart, Sliders, Home, Plus, Trash2, X } from 'lucide-react';
 
@@ -12,6 +13,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { categories, activeCategory, setActiveCategory, deleteCategory, addCategory, availableIcons, isGuest, flashcards } = useAppContext();
   
   const iconMap: { [key: string]: React.ComponentType<LucideIcons.LucideProps> } = {
@@ -51,15 +53,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
   };
   
   const navItems = [
-    { path: '/', label: 'Home', icon: <Home size={20} /> },
-    { path: '/study', label: 'Study Cards', icon: <BookOpen size={20} /> },
-    { path: '/favorites', label: 'Favorites', icon: <Star size={20} /> },
-    { path: '/settings', label: 'Settings', icon: <Sliders size={20} /> },
+    { path: '/', label: t('home'), icon: <Home size={20} /> },
+    { path: '/study', label: t('studyCards'), icon: <BookOpen size={20} /> },
+    { path: '/favorites', label: t('favorites'), icon: <Star size={20} /> },
+    { path: '/settings', label: t('settings'), icon: <Sliders size={20} /> },
   ];
   
   const handleDeleteCategory = (e: React.MouseEvent, categoryId: string) => {
     e.stopPropagation();
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta categoría? Esto también eliminará la categoría de todas las tarjetas asociadas.')) {
+    if (window.confirm(t('deleteCategoryConfirm'))) {
       deleteCategory(categoryId);
     }
   };
@@ -142,12 +144,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
             
             <div className="mt-6">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium text-neutral-500 dark:text-neutral-400 text-sm uppercase tracking-wider">Categories</h3>
+                <h3 className="font-medium text-neutral-500 dark:text-neutral-400 text-sm uppercase tracking-wider">{t('categories')}</h3>
                  {!isGuest && !isAddingCategory && (
                    <button
                      onClick={handleAddCategoryClick}
                      className="p-1.5 text-primary-600 hover:bg-primary-50 rounded-full transition-colors duration-200"
-                     aria-label="Add new category"
+                     aria-label={t('addNewCategory')}
                    >
                      <Plus size={16} />
                    </button>
@@ -158,7 +160,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
                  <div className="flex items-center space-x-2 mb-2">
                     <input
                        type="text"
-                       placeholder="Category name..."
+                       placeholder={t('categoryNamePlaceholder')}
                        value={newCategoryName}
                        onChange={(e) => setNewCategoryName(e.target.value)}
                        className="flex-1 px-2 py-1 border border-neutral-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-100"
@@ -172,14 +174,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
                     <button
                        onClick={handleCreateCategory}
                        className="p-1.5 text-success-600 hover:bg-success-50 rounded-full transition-colors duration-200"
-                       aria-label="Create category"
+                       aria-label={t('createCategory')}
                     >
                        <Check size={16} />
                     </button>
                      <button
                        onClick={handleCancelAddCategory}
                        className="p-1.5 text-error-600 hover:bg-error-50 rounded-full transition-colors duration-200"
-                       aria-label="Cancel category creation"
+                       aria-label={t('cancelCategoryCreation')}
                     >
                        <X size={16} />
                     </button>
@@ -198,7 +200,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar }) => {
                     onClick={() => setShowCategoryDropdown((prev) => !prev)}
                   >
                     <span className="mr-3 text-neutral-500 dark:text-neutral-400"><BookOpen size={20} /></span>
-                    All Categories
+                    {t('allCategories')}
                     <svg className={`ml-auto w-4 h-4 transition-transform ${showCategoryDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                   </button>
                   {showCategoryDropdown && (

@@ -1,5 +1,4 @@
-/** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
@@ -111,6 +110,10 @@ export default {
       boxShadow: {
         'card': '0 2px 10px rgba(0, 0, 0, 0.05)',
         'card-hover': '0 4px 20px rgba(0, 0, 0, 0.08)',
+      },
+      screens: {
+        'landscape': {'raw': '(orientation: landscape)'},
+        'portrait': {'raw': '(orientation: portrait)'},
       },
     },
   },

@@ -235,7 +235,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
             </div>
             <div className="flex flex-col items-center">
               {flashcard.imageUrl && (
-                <div className="mb-2 sm:mb-4 w-40 h-40 sm:w-60 sm:h-60 rounded-lg overflow-hidden">
+                <div className="mb-2 sm:mb-4 w-40 h-40 sm:w-60 sm:h-60 rounded-lg overflow-hidden study-card-image">
                 <ImageWithFallback
                   src={flashcard.imageUrl}
                     alt={flashcard.englishWord}
@@ -243,35 +243,21 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
                 />
                 </div>
               )}
-              <div className="text-center select-none flex flex-row items-center justify-center gap-2">
+              <div className="text-center select-none">
+                <h2 className="text-2xl font-bold mb-2 select-none">{targetTranslation}</h2>
                 <button
-                  onClick={handlePronounceWord}
+                  onClick={handlePronounceTargetTranslation}
                   className="p-3 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
-                  aria-label="Pronounce word"
                 >
                   <Volume2 size={24} className="text-sky-600" />
                 </button>
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    const utterance = new SpeechSynthesisUtterance(flashcard.englishWord);
-                    utterance.lang = 'en-US';
-                    utterance.rate = 0.5;
-                    window.speechSynthesis.speak(utterance);
-                  }}
-                  className="p-3 rounded-full bg-blue-200 hover:bg-blue-300 transition-colors ml-1"
-                  aria-label="Pronounce word slowly"
-                  title="Slow audio"
-                >
-                  <span role="img" aria-label="slow">🐌</span>
-                </button>
               </div>
-
-              {flashcard.englishSentence && (
+              
+              {targetSentence && (
                 <div className="mt-4 text-center select-none flex flex-row items-center justify-center gap-2">
-                  <p className="text-base sm:text-lg text-neutral-600 dark:text-neutral-400 mb-2 select-none">{flashcard.englishSentence}</p>
+                  <p className="text-base sm:text-lg text-neutral-600 dark:text-neutral-400 mb-2 select-none">{targetSentence}</p>
                   <button
-                    onClick={handlePronounceEnglishSentence}
+                    onClick={handlePronounceTargetSentence}
                     className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
                     aria-label="Pronounce sentence"
                   >
@@ -280,8 +266,8 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
                   <button
                     onClick={e => {
                       e.stopPropagation();
-                      const utterance = new SpeechSynthesisUtterance(flashcard.englishSentence);
-                      utterance.lang = 'en-US';
+                      const utterance = new SpeechSynthesisUtterance(targetSentence);
+                      utterance.lang = targetLang;
                       utterance.rate = 0.5;
                       window.speechSynthesis.speak(utterance);
                     }}
