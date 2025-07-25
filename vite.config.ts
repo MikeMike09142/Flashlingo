@@ -11,9 +11,9 @@ export default defineConfig({
       manifest: {
         name: 'FlashLingo',
         short_name: 'FlashLingo',
-        start_url: '.',
-        display: 'fullscreen',
-        orientation: 'portrait',
+        start_url: '/',
+        display: 'standalone',
+        orientation: 'portrait-primary',
         background_color: '#18181b',
         theme_color: '#2563eb',
         description: 'Learn English vocabulary with interactive flashcards.',
@@ -21,12 +21,14 @@ export default defineConfig({
           {
             src: '/icons/icon-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           },
           {
             src: '/icons/icon-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       },
