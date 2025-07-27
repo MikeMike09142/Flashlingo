@@ -110,16 +110,26 @@ export const translations = {
     studyTargetLanguage: 'Study Target Language',
     studyTargetLanguageDescription: 'Choose which language you want to learn with your flashcards',
     
+    // Add these new timer and sound settings
+    studySettings: 'Study Settings',
+    cardChangeSound: 'Card Change Sound',
+    cardChangeSoundDescription: 'Play sound when switching between cards',
+    studyTimer: 'Study Timer',
+    studyTimerDescription: 'Automatically mark cards as "I don\'t know" after time expires',
+    timerDuration: 'Timer Duration (seconds)',
+    enableTimer: 'Enable Timer',
+    
     // Study Modes
     flashcardMode: 'Flashcard Mode',
     recognitionMode: 'Recognition Mode',
     imageMode: 'Image Mode',
     
     // Welcome Screen
-    welcomeMessage1: 'Welcome to FlashLingo! Boost your vocabulary with fun flashcards.',
-    welcomeMessage2: 'Swipe through images, listen to audio, and master new words.',
-    welcomeMessage3: 'Track your progress anywhere – even offline. Let\'s get started!',
-    tapToContinue: 'Tap or swipe to continue',
+    welcomeMessage1: '📱 ¡Para la mejor experiencia, usa FlashLingo en modo vertical (retrato)!',
+    welcomeMessage2: '¡Bienvenido a FlashLingo! Mejora tu vocabulario con tarjetas divertidas.',
+    welcomeMessage3: 'Desliza por imágenes, escucha audio y domina nuevas palabras.',
+    welcomeMessage4: 'Sigue tu progreso en cualquier lugar, incluso sin conexión. ¡Empecemos!',
+    tapToContinue: 'Toca o desliza para continuar',
     
     // HomePage
     myFlashcards: 'My Flashcards',
@@ -143,6 +153,16 @@ export const translations = {
     // Import/Export
     flashcardsImportedSuccessfully: 'Flashcards imported successfully!',
     failedToImportFlashcards: 'Failed to import flashcards. Please check the file format.',
+    exportFlashcards: 'Export Flashcards',
+    importFlashcards: 'Import Flashcards',
+    backupRestore: 'Backup & Restore',
+    exportDescription: 'Download all your flashcards as a JSON backup file',
+    importDescription: 'Upload a previously exported JSON file to restore your flashcards',
+    selectFile: 'Select File',
+    
+    // Data Storage Warning
+    dataStorageWarning: 'Data Storage Notice',
+    dataStorageWarningText: 'All your flashcards and progress are stored locally on your device. If you delete the app or clear your browser cache, all data will be permanently lost. Consider exporting your flashcards regularly as a backup.',
   },
   es: {
     // Navigation
@@ -255,6 +275,15 @@ export const translations = {
     studyTargetLanguage: 'Idioma de Estudio',
     studyTargetLanguageDescription: 'Elige qué idioma quieres aprender con tus tarjetas',
     
+    // Add these new timer and sound settings
+    studySettings: 'Configuración de Estudio',
+    cardChangeSound: 'Sonido de Cambio de Tarjeta',
+    cardChangeSoundDescription: 'Reproducir sonido al cambiar entre tarjetas',
+    studyTimer: 'Temporizador de Estudio',
+    studyTimerDescription: 'Marcar automáticamente las tarjetas como "No lo sé" cuando expire el tiempo',
+    timerDuration: 'Duración del Temporizador (segundos)',
+    enableTimer: 'Habilitar Temporizador',
+    
     // Study Modes
     flashcardMode: 'Modo Tarjetas',
     recognitionMode: 'Modo Reconocimiento',
@@ -288,6 +317,10 @@ export const translations = {
     // Import/Export
     flashcardsImportedSuccessfully: '¡Tarjetas importadas exitosamente!',
     failedToImportFlashcards: 'Error al importar tarjetas. Por favor verifica el formato del archivo.',
+    
+    // Data Storage Warning
+    dataStorageWarning: 'Aviso de Almacenamiento de Datos',
+    dataStorageWarningText: 'Todas tus tarjetas y progreso se almacenan localmente en tu dispositivo. Si eliminas la aplicación o borras la caché del navegador, todos los datos se perderán permanentemente. Considera exportar tus tarjetas regularmente como respaldo.',
   }
 };
 

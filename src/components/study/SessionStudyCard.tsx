@@ -503,7 +503,13 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
 
   if (!currentCard) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div
+        className="flex flex-1 justify-center items-center w-full min-h-screen bg-neutral-100 dark:bg-neutral-900 px-2 sm:px-0"
+        style={{
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          overflow: 'hidden',
+        }}
+      >
         <p className="text-neutral-500">No more cards to review.</p>
       </div>
     );
@@ -553,7 +559,7 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
 
   return (
     <div
-      className="flex flex-1 justify-center items-center w-full min-h-screen bg-neutral-900 px-2 sm:px-0"
+      className="flex flex-1 justify-center items-center w-full min-h-screen bg-neutral-100 dark:bg-neutral-900 px-2 sm:px-0"
       style={{
         paddingBottom: 'env(safe-area-inset-bottom)',
         overflow: 'hidden',
@@ -754,3 +760,5 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
 };
 
 export default SessionStudyCard;
+
+

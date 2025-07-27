@@ -12,7 +12,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onFinish }) => {
   const messages = [
     t('welcomeMessage1'),
     t('welcomeMessage2'),
-    t('welcomeMessage3')
+    t('welcomeMessage3'),
+    t('welcomeMessage4')
   ];
 
   const handleNext = useCallback(() => {

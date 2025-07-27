@@ -61,7 +61,21 @@ const RotationOverlay: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  const [showWelcome, setShowWelcome] = React.useState<boolean>(() => !localStorage.getItem('hasSeenWelcome'));
+  const [showWelcome, setShowWelcome] = React.useState<boolean>(() => {
+    // Check if running in APK/TWA environment
+    const isAPK = window.matchMedia('(display-mode: standalone)').matches || 
+                  window.navigator.standalone === true ||
+                  document.referrer.includes('android-app://');
+    
+    // For APK, always show welcome on first launch
+    if (isAPK) {
+      const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+      return !hasSeenWelcome;
+    }
+    
+    // For web, use existing logic
+    return !localStorage.getItem('hasSeenWelcome');
+  });
 
   // Inicializar SpeechSynthesis al cargar la app para evitar delay en el primer audio
   useEffect(() => {

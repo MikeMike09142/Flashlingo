@@ -22,6 +22,7 @@ const FlashcardFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = !!id;
+  const { t } = useTranslation(); // Add this line!
   
   const { 
     getFlashcardById, 

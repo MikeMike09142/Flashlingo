@@ -182,7 +182,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   const targetLangName = studyTargetLanguage === 'french' ? 'French' : 'Spanish';
 
   if (!isFlipped) return (
-    <div className="flex flex-1 justify-center items-center w-full min-h-screen bg-neutral-900 px-2 sm:px-0 relative swipe-container overflow-hidden" style={{paddingBottom: 'env(safe-area-inset-bottom)'}}>
+    <div className="flex flex-1 justify-center items-center w-full min-h-screen bg-neutral-100 dark:bg-neutral-900 px-2 sm:px-0 relative swipe-container overflow-hidden" style={{paddingBottom: 'env(safe-area-inset-bottom)'}}>
       {/* Swipe indicators */}
       <div className="absolute inset-0 pointer-events-none z-10">
         <div className={`absolute bottom-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
@@ -328,7 +328,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
   )
 
   return (
-    <div className="flex flex-1 justify-center items-center w-full min-h-screen bg-neutral-900 px-2 sm:px-0 relative swipe-container overflow-hidden" style={{paddingBottom: 'env(safe-area-inset-bottom)'}}>
+    <div className="flex flex-1 justify-center items-center w-full min-h-screen bg-neutral-100 dark:bg-neutral-900 px-2 sm:px-0 relative swipe-container overflow-hidden" style={{paddingBottom: 'env(safe-area-inset-bottom)'}}>
       {/* Swipe indicators */}
       <div className="absolute inset-0 pointer-events-none z-10">
         <div className={`absolute bottom-4 right-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
