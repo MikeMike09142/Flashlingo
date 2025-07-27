@@ -6,6 +6,7 @@ import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
 import ImageWithFallback from '../ui/ImageWithFallback';
 import { playSound } from '../../pages/StudyPage';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface SessionStudyCardProps {
   session: StudySession;
@@ -21,8 +22,11 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
   onExitSession
 }) => {
   const { flashcards, categories, studyTargetLanguage, updateFlashcard, theme } = useAppContext();
+  const { t } = useTranslation();
+  
   const [currentCardIndex, setCurrentCardIndex] = useState(session.currentCardIndex);
-  const [isFlipped, setIsFlipped] = useState(false);
+  // Remove this line - it's the duplicate that's causing the issue
+  // const [isFlipped, setIsFlipped] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [sessionCards, setSessionCards] = useState<Flashcard[]>([]);
@@ -47,7 +51,9 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
     const saved = localStorage.getItem('recognitionShowImages');
     return saved !== 'false'; // default true
   });
-
+  
+  // Keep this line - it's the correct initialization
+  const [isFlipped, setIsFlipped] = useState(() => !frontLearning);
   const [{ x, rotate, scale, opacity }, api] = useSpring(() => ({
     x: 0,
     rotate: 0,
@@ -71,20 +77,62 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
 
   // Reset card state when card changes
   useEffect(() => {
+    console.log('[DEBUG] useEffect currentCardIndex changed:', {
+      currentCardIndex,
+      frontLearning,
+      willSetIsFlipped: false, // Always start on front side
+      timestamp: new Date().toISOString()
+    });
     setIsTransitioning(false);
     setSwipeDirection(null);
+    // Fix: Always start cards on the front side (isFlipped=false)
+    setIsFlipped(false);
     api.start({ x: 0, rotate: 0, scale: 1, opacity: 1 });
-  }, [currentCardIndex, api]);
-
+  }, [currentCardIndex, api]); // Keep frontLearning out of dependencies!
+  
+  // Remove this entire useEffect - it's causing conflicts
+  // useEffect(() => {
+  //   // When user changes the Start: Front/Back preference, update current card
+  //   setIsFlipped(!frontLearning);
+  // }, [frontLearning]);
+  
   // Solo resetea el índice si cambia la cantidad de tarjetas (nueva ronda o repaso)
   const prevSessionCardsLength = useRef(sessionCards.length);
   useEffect(() => {
     if (sessionCards.length !== prevSessionCardsLength.current) {
+      console.log('[DEBUG] sessionCards.length changed:', {
+        oldLength: prevSessionCardsLength.current,
+        newLength: sessionCards.length,
+        frontLearning,
+        willSetIsFlipped: false, // Always start on front side
+        timestamp: new Date().toISOString()
+      });
       setCurrentCardIndex(0);
+      // Fix: Always start new cards on the front side
       setIsFlipped(false);
       prevSessionCardsLength.current = sessionCards.length;
     }
-  }, [sessionCards.length]);
+  }, [sessionCards.length, frontLearning]);
+
+  // Add debug logging for isFlipped state changes
+  useEffect(() => {
+    console.log('[DEBUG] isFlipped state changed:', {
+      isFlipped,
+      frontLearning,
+      currentCardIndex,
+      timestamp: new Date().toISOString()
+    });
+  }, [isFlipped, frontLearning, currentCardIndex]);
+
+  // Add debug logging for frontLearning changes
+  useEffect(() => {
+    console.log('[DEBUG] frontLearning preference changed:', {
+      frontLearning,
+      currentCardIndex,
+      currentIsFlipped: isFlipped,
+      timestamp: new Date().toISOString()
+    });
+  }, [frontLearning]);
 
   const currentCard = sessionCards[currentCardIndex];
   const effectiveProgress = ((currentCardIndex + 1) / sessionCards.length) * 100;
@@ -112,17 +160,38 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
       e.stopPropagation();
       e.preventDefault();
     }
-    if (isTransitioning) return;
+    if (isTransitioning) {
+      console.log('[DEBUG] handleFlip blocked - isTransitioning:', isTransitioning);
+      return;
+    }
     
-    // Add a small delay to prevent conflicts with swipe gestures
+    console.log('[DEBUG] handleFlip called:', {
+      currentIsFlipped: isFlipped,
+      willToggleTo: !isFlipped,
+      frontLearning,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Set transitioning to prevent useEffect interference
+    setIsTransitioning(true);
+    setIsFlipped(f => !f);
+    
+    // Reset transitioning after a brief moment
     setTimeout(() => {
-      setIsFlipped(f => !f);
-    }, 50);
-  }, [isTransitioning]);
+      setIsTransitioning(false);
+    }, 100);
+  }, [isTransitioning, isFlipped, frontLearning]);
 
   const moveToNextCard = useCallback((e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setIsFlipped(false); // Resetea antes de cambiar de tarjeta
+    console.log('[DEBUG] moveToNextCard called:', {
+      currentCardIndex,
+      frontLearning,
+      willSetIsFlipped: false, // Always start on front side
+      timestamp: new Date().toISOString()
+    });
+    // Fix: Always start new cards on the front side
+    setIsFlipped(false);
     setCurrentCardIndex(prev => prev + 1);
     if (theme.cardChangeSoundEnabled) {
       try {
@@ -133,7 +202,7 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
         console.error('Error al intentar reproducir el sonido:', err);
       }
     }
-  }, [theme]);
+  }, [theme, frontLearning]);
 
   // Add debug logging for card progression
   useEffect(() => {
@@ -465,28 +534,18 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
   const englishWordOnly = currentCard?.englishWord || '';
   const englishSentenceOnly = currentCard?.englishSentence || '';
 
-  // En recognition siempre ocultamos texto del frente, pero respetamos el idioma
-  const frontIsLearning = frontLearning;
-  const showLearningOnFront = (!isFlipped && frontIsLearning) || (isFlipped && !frontIsLearning);
-
-  let word = showLearningOnFront ? learningWord : englishWordOnly;
-  let sentence = showLearningOnFront ? learningSentence : englishSentenceOnly;
-  let lang = showLearningOnFront ? learningLang : 'en-US';
-
-  // En recognition mode, invertimos audio/texto según estudio: si learning es francés, frente francés; si español, frente inglés (como antes)
-  if (sessionMode === 'image') {
-    if (studyTargetLanguage === 'spanish') {
-      // Frente inglés
-      word = showLearningOnFront ? englishWordOnly : learningWord;
-      sentence = showLearningOnFront ? englishSentenceOnly : learningSentence;
-      lang = showLearningOnFront ? 'en-US' : learningLang;
-    } else if (studyTargetLanguage === 'french') {
-      // Frente francés
-      word = showLearningOnFront ? learningWord : englishWordOnly;
-      sentence = showLearningOnFront ? learningSentence : englishSentenceOnly;
-      lang = showLearningOnFront ? learningLang : 'en-US';
-    }
-  }
+  // Fixed logic:
+  // frontLearning=true ("Start: Front"): front shows Spanish, back shows English
+  // frontLearning=false ("Start: Back"): front shows English, back shows Spanish
+  const showLearningLanguage = frontLearning ? !isFlipped : isFlipped;
+  
+  let word = showLearningLanguage ? learningWord : englishWordOnly;
+  let sentence = showLearningLanguage ? learningSentence : englishSentenceOnly;
+  let lang = showLearningLanguage ? learningLang : 'en-US';
+  
+  // Remove the image mode override that was breaking "Start: Back" mode
+  // The base logic above already handles frontLearning preference correctly
+  // No special handling needed for image mode
 
   const showText = !(sessionMode === 'image' && !isFlipped);
 
@@ -501,13 +560,13 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
       }}
     >
       {/* Session Header */}
-      <div className="absolute top-0 left-0 right-0 mt-3 mb-2 z-10 w-full flex flex-col items-center px-2 sm:px-4 md:px-0 md:mt-6 md:mb-8 md:space-y-2">
+      <div className="absolute top-0 left-0 right-0 mt-3 mb-2 z-10 w-full flex flex-col items-center px-2 sm:px-4 md:px-0 md:mt-6 md:mb-8 md:space-y-2 session-header">
         <div className="flex items-center justify-center w-full mb-2 md:mb-6">
           <button
             onClick={handleExitSession}
             className="text-sm text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
           >
-            ← Exit Session
+            ← {t('exitSession')}
           </button>
           <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-500">
             <div className="flex items-center gap-1">
@@ -523,20 +582,20 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
                 onClick={toggleShowImages}
                 className="px-3 py-1 text-xs rounded-full border border-neutral-500 dark:border-neutral-400 text-neutral-300 dark:text-neutral-300 active:scale-95 transition"
               >
-                {showImages ? 'Hide Images' : 'Show Images'}
+                {showImages ? t('hideImages') : t('showImages')}
               </button>
             )}
+            <button
+              onClick={toggleFrontLanguage}
+              className="px-4 py-2 text-sm rounded-full border border-neutral-500 dark:border-neutral-400 text-neutral-300 dark:text-neutral-300 active:scale-95 transition font-medium"
+            >
+              {frontLearning ? t('startFront') : t('startBack')}
+            </button>
           </div>
-          <button
-            onClick={toggleFrontLanguage}
-            className="text-xs px-2 py-1 rounded border border-neutral-500 text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:border-neutral-600"
-          >
-            {frontLearning ? 'Front: Learning' : 'Front: English'}
-          </button>
-        </div>
+          </div>
         
         {/* Progress Bar */}
-        <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-4 mt-2">
+        <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-4 mt-2 progress-bar">
           <div 
             className="bg-blue-500 h-2 rounded-full transition-all duration-300"
             style={{ width: `${effectiveProgress}%` }}
@@ -571,8 +630,10 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
         onClick={handleFlip}
       >
         <div className="w-full h-full flex flex-col items-center gap-y-2 bg-white dark:bg-neutral-800 p-2 sm:p-6 rounded-xl select-none">
-            {(sessionMode !== 'image' || showImages) && currentCard.imageUrl && (
-            <div className="mb-2 sm:mb-4 w-40 h-40 sm:w-60 sm:h-60 rounded-lg overflow-hidden study-card-image">
+            
+            {/* Force image display in landscape mode */}
+            {((sessionMode !== 'image' || showImages) && currentCard.imageUrl) && (
+            <div className="mb-2 sm:mb-4 w-40 h-40 sm:w-60 sm:h-60 rounded-lg overflow-hidden study-card-image mobile-landscape-image">
                 <ImageWithFallback
                   src={currentCard.imageUrl}
                   alt={word}
@@ -582,7 +643,7 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
             )}
             {showText && (
             <div className="text-center select-none">
-              <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 select-none truncate">{word}</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 select-none truncate card-title">{word}</h2>
               </div>
             )}
           <div className="text-center select-none flex flex-row items-center justify-center gap-2 mt-6">
@@ -593,7 +654,7 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
                 utterance.lang = lang;
                 window.speechSynthesis.speak(utterance);
               }}
-              className="p-3 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
+              className="p-3 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors audio-button"
               aria-label="Pronounce word"
             >
               <Volume2 size={24} className="text-sky-600" />
@@ -606,7 +667,7 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
                 utterance.rate = 0.5;
                 window.speechSynthesis.speak(utterance);
               }}
-              className="p-3 rounded-full bg-blue-200 hover:bg-blue-300 transition-colors ml-1"
+              className="p-3 rounded-full bg-blue-200 hover:bg-blue-300 transition-colors ml-1 audio-button"
               aria-label="Pronounce word slowly"
               title="Slow audio"
             >
@@ -614,7 +675,7 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
             </button>
           </div>
             {sentence && (
-            <div className="mt-4 text-center select-none flex flex-row items-center justify-center gap-2">
+            <div className="mt-4 text-center select-none flex flex-row items-center justify-center gap-2 sentence-container">
               <p className="text-base sm:text-lg text-neutral-600 dark:text-neutral-400 mb-1 sm:mb-2 select-none break-words">{showText ? sentence : ''}</p>
               <button
                 onClick={(e) => {
@@ -623,7 +684,7 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
                   utterance.lang = lang;
                   window.speechSynthesis.speak(utterance);
                 }}
-                className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors"
+                className="p-2.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 transition-colors audio-button"
                 aria-label="Pronounce sentence"
               >
                 <Volume2 size={20} className="text-sky-600" />
@@ -636,7 +697,7 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
                   utterance.rate = 0.5;
                   window.speechSynthesis.speak(utterance);
                 }}
-                className="p-2.5 rounded-full bg-blue-200 hover:bg-blue-300 transition-colors ml-1"
+                className="p-2.5 rounded-full bg-blue-200 hover:bg-blue-300 transition-colors ml-1 audio-button"
                 aria-label="Pronounce sentence slowly"
                 title="Slow audio"
               >
@@ -646,28 +707,30 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
             )}
           {/* Botones de acción + instrucciones */}
           <div className="w-full">
-            <div className="flex flex-row justify-between gap-4 mt-2 w-[320px] max-w-full mx-auto">
+            <div className={`flex flex-row gap-4 mt-2 w-[320px] max-w-full mx-auto action-buttons ${
+              sessionMode === 'freestyle_review' ? 'justify-center' : 'justify-between'
+            }`}>
               {sessionMode === 'freestyle_review' ? (
                 <button
                   onClick={(e) => !isTransitioning && moveToNextCard(e)}
                   className="flex items-center justify-center px-1 py-4 w-full max-w-[140px] rounded-xl bg-orange-500 text-white text-lg font-semibold shadow-lg hover:bg-orange-600 transition-colors"
-                  aria-label="Reviewed"
+                  aria-label={t('cardReviewed')}
                 >
-                  <Check size={28} className="mr-2" /> Card Reviewed
+                  <Check size={28} className="mr-2" /> {t('cardReviewed')}
                 </button>
               ) : (
                 <>
                   <button
                     onClick={(e) => handleDontKnow(e)}
                     className="flex items-center justify-center px-1 py-4 w-1/2 max-w-[140px] rounded-xl bg-red-600 text-white text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors"
-                    aria-label="I Don't Know"
+                    aria-label={t('iDontKnow')}
                   >
                     <X size={28} />
                   </button>
                   <button
                     onClick={(e) => handleKnow(e)}
                     className="flex items-center justify-center px-1 py-4 w-1/2 max-w-[140px] rounded-xl bg-green-600 text-white text-lg font-semibold shadow-lg hover:bg-green-700 transition-colors"
-                    aria-label="I Know"
+                    aria-label={t('iKnow')}
                   >
                     <Check size={28} />
                   </button>
@@ -675,8 +738,13 @@ const SessionStudyCard: React.FC<SessionStudyCardProps> = ({
               )}
             </div>
             <div className="text-center text-neutral-500 dark:text-neutral-400 select-none mt-2">
-              <p className="select-none text-xs sm:text-sm">{!isFlipped ? 'Tap to see translation • Swipe or use the buttons to answer' : 'Tap to return • Swipe or use the buttons to answer'}</p>
-              <ArrowRight className="mx-auto mt-2" size={20} />
+              <p className="select-none text-xs sm:text-sm">
+                {!isFlipped 
+                ? `${t('tapToSeeTranslation')} • ${t('swipeOrUseButtons')}` 
+                : `${t('tapToReturn')} • ${t('swipeOrUseButtons')}`
+              }
+            </p>
+            <ArrowRight className="mx-auto mt-2" size={20} />
           </div>
           </div>
         </div>

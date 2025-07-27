@@ -6,6 +6,7 @@ import { useAppContext } from '../../context/AppContext';
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
 import ImageWithFallback from '../ui/ImageWithFallback';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface StudyCardProps {
   flashcard: Flashcard;
@@ -190,7 +191,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
             : 'bg-green-500/10 text-green-500'
         }`}>
           <Check size={16} className="mr-1" />
-          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>I Know</span>
+          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>{t('iKnow')}</span>
         </div>
         <div className={`absolute bottom-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
           swipeDirection === 'left' 
@@ -198,7 +199,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
             : 'bg-red-500/10 text-red-500'
         }`}>
           <X size={16} className="mr-1" />
-          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>I Don't Know</span>
+          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>{t('iDontKnow')}</span>
         </div>
       </div>
       
@@ -220,6 +221,23 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
         aria-label={`Tap to see ${targetLangName} translation`}
       >
         <div className="p-4 w-full flex flex-col items-center gap-y-2 select-none">
+          {/* Front/Back indicator */}
+          <div className="w-full flex justify-between items-center mb-2">
+            <div className="px-2 py-1 text-xs rounded-full bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300">
+              {!isFlipped ? t('front') : t('back')}
+            </div>
+            <div className="flex justify-end space-x-2">
+              {categoriesList.map((category: any) => (
+                <span
+                  key={category!.id}
+                  className="px-2 py-1 text-xs rounded-full text-white"
+                  style={{ backgroundColor: category!.color }}
+                >
+                  {category!.name}
+                </span>
+              ))}
+            </div>
+          </div>
           {/* Front/Back side */}
           <div className="w-full flex flex-col items-center gap-y-2 select-none">
             <div className="flex justify-end space-x-2">
@@ -300,7 +318,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
               </button>
             </div>
             <div className="text-center text-neutral-500 dark:text-neutral-400 select-none mt-2">
-              <p className="select-none text-xs sm:text-sm">Tap to see translation • Swipe left/right to answer</p>
+              <p className="select-none text-xs sm:text-sm">{t('tapToSeeTranslation')} • {t('swipeLeftRight')}</p>
               <ArrowRight className="mx-auto mt-2" size={20} />
             </div>
           </div>
@@ -319,7 +337,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
             : 'bg-green-500/10 text-green-500'
         }`}>
           <Check size={16} className="mr-1" />
-          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>I Know</span>
+          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>{t('iKnow')}</span>
         </div>
         <div className={`absolute bottom-4 left-4 px-3 py-1 rounded-full text-sm font-medium flex items-center transition-all duration-200 ${
           swipeDirection === 'left' 
@@ -327,7 +345,7 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
             : 'bg-red-500/10 text-red-500'
         }`}>
           <X size={16} className="mr-1" />
-          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>I Don't Know</span>
+          <span style={{ textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>{t('iDontKnow')}</span>
         </div>
       </div>
       
@@ -407,20 +425,20 @@ const StudyCard: React.FC<StudyCardProps> = ({ flashcard, onKnow, onDontKnow, is
               <button
                 onClick={onDontKnow}
                 className="flex items-center justify-center px-1 py-4 w-1/2 max-w-[160px] rounded-xl bg-red-600 text-white text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors"
-                aria-label="I Don't Know"
+                aria-label={t('iDontKnow')}
               >
                 <X size={28} />
               </button>
               <button
                 onClick={onKnow}
                 className="flex items-center justify-center px-1 py-4 w-1/2 max-w-[160px] rounded-xl bg-green-600 text-white text-lg font-semibold shadow-lg hover:bg-green-700 transition-colors"
-                aria-label="I Know"
+                aria-label={t('iKnow')}
               >
                 <Check size={28} />
               </button>
             </div>
             <div className="text-center text-neutral-500 dark:text-neutral-400 select-none mt-2">
-              <p className="select-none text-xs sm:text-sm">Tap to see translation • Swipe left/right to answer</p>
+              <p className="select-none text-xs sm:text-sm">{t('tapToSeeTranslation')} • {t('swipeLeftRight')}</p>
               <ArrowRight className="mx-auto mt-2" size={20} />
             </div>
           </div>

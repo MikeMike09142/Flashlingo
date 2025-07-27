@@ -13,13 +13,79 @@
 }
 
 .dark .btn-reset-progress {
-  background-color: #6b1616; /* Tono oscuro de error similar a error-900 */
-  color: #fecaca; /* Tono claro de error similar a error-200 */
+  background-color: #6b1616;
+  color: #fecaca;
+}
+
+/* FORCE PORTRAIT ORIENTATION - AGGRESSIVE APPROACH */
+@media screen and (orientation: landscape) {
+  html {
+    transform: rotate(90deg);
+    transform-origin: center center;
+    width: 100vh;
+    height: 100vw;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+  
+  body {
+    transform: rotate(-90deg);
+    transform-origin: center center;
+    width: 100vh;
+    height: 100vw;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+  
+  #root {
+    width: 100vh;
+    height: 100vw;
+    transform: rotate(-90deg);
+    transform-origin: center center;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+}
+
+/* Alternative: Show rotation message for devices that can't be forced */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .rotation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .rotation-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+    animation: rotate 2s linear infinite;
+  }
+  
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
 }
 
 /* Mobile-specific styles for swipe gestures */
 @media (max-width: 768px) {
-  /* Prevent text selection during swipe */
   .swipe-container {
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -29,13 +95,11 @@
     -webkit-tap-highlight-color: transparent;
   }
   
-  /* Improve touch responsiveness */
   .swipe-card {
     touch-action: pan-y;
     will-change: transform;
   }
   
-  /* Smooth animations for mobile */
   .swipe-card * {
     pointer-events: none;
   }
@@ -46,14 +110,12 @@
   }
 }
 
-/* Prevent horizontal scrolling on mobile */
 @media (max-width: 768px) {
   body {
     overflow-x: hidden;
   }
 }
 
-/* Critical touch-action for swipe gestures */
 .swipe-card {
   touch-action: none !important;
   -webkit-touch-callout: none;
@@ -61,4 +123,137 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-} 
+}
+
+/* Simple approach: prevent landscape layout issues */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  /* Hide the app content in landscape mode */
+  body::before {
+    content: "Please rotate your device to portrait mode for the best experience";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #1f2937;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  #root {
+    display: none;
+  }
+}
+
+/* COMPREHENSIVE MOBILE LANDSCAPE OPTIMIZATIONS */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  /* Force image visibility and sizing */
+  .mobile-landscape-image,
+  .study-card-image {
+    display: block !important;
+    width: 80px !important;
+    height: 80px !important;
+    flex-shrink: 0 !important;
+    margin-bottom: 8px !important;
+  }
+  
+  /* Optimize main container */
+  .swipe-card {
+    height: calc(100vh - 120px) !important;
+    min-height: 280px !important;
+    padding: 6px !important;
+  }
+  
+  /* Reduce header spacing */
+  .session-header {
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+    padding: 4px !important;
+  }
+  
+  /* Compact text sizing */
+  .card-title {
+    font-size: 1.5rem !important;
+    margin-bottom: 4px !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Reduce button spacing */
+  .action-buttons {
+    margin-top: 8px !important;
+    gap: 8px !important;
+  }
+  
+  /* Compact audio buttons */
+  .audio-button {
+    padding: 6px !important;
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  /* Reduce sentence spacing */
+  .sentence-container {
+    margin-top: 6px !important;
+  }
+  
+  /* Compact progress bar */
+  .progress-bar {
+    height: 1px !important;
+    margin: 2px 0 !important;
+  }
+}
+
+@media screen and (max-height: 400px) and (orientation: landscape) {
+  /* Even smaller images for very short screens */
+  .mobile-landscape-image,
+  .study-card-image {
+    width: 60px !important;
+    height: 60px !important;
+    margin-bottom: 4px !important;
+  }
+  
+  /* Ultra-compact layout */
+  .swipe-card {
+    height: calc(100vh - 80px) !important;
+    min-height: 220px !important;
+    padding: 4px !important;
+  }
+  
+  .card-title {
+    font-size: 1.25rem !important;
+    margin-bottom: 2px !important;
+  }
+  
+  .action-buttons {
+    margin-top: 4px !important;
+  }
+  
+  /* Hide progress bar on very short screens */
+  .progress-bar {
+    display: none !important;
+  }
+  
+  /* Ultra-compact audio buttons */
+  .audio-button {
+    padding: 4px !important;
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+/* Force image visibility in all landscape orientations */
+@media screen and (orientation: landscape) {
+  .study-card-image,
+  .mobile-landscape-image {
+    display: block !important;
+    flex-shrink: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}

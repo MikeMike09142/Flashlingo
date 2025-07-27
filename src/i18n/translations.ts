@@ -23,7 +23,7 @@ export const translations = {
     cancelCategoryCreation: 'Cancel category creation',
     deleteCategoryConfirm: 'Are you sure you want to delete this category? This will also remove the category from all associated cards.',
     
-    // Study
+    // Study Interface
     startStudy: 'Start Study',
     studySession: 'Study Session',
     showAnswer: 'Show Answer',
@@ -33,6 +33,42 @@ export const translations = {
     incorrect: 'Incorrect',
     studyComplete: 'Study Complete!',
     studyAgain: 'Study Again',
+    exitSession: 'Exit Session',
+    tapToSeeTranslation: 'Tap to see translation',
+    tapToReturn: 'Tap to return',
+    swipeOrUseButtons: 'Swipe or use the buttons to answer',
+    swipeLeftRight: 'Swipe left/right to answer',
+    iKnow: 'I Know',
+    iDontKnow: 'I Don\'t Know',
+    hideImages: 'Hide Images',
+    showImages: 'Show Images',
+    frontLearning: 'Front',
+    frontEnglish: 'Front',
+    cardReviewed: 'Card Reviewed',
+    
+    // Add these new keys
+    front: 'Front',
+    back: 'Back',
+    startFront: 'Start: Front',
+    startBack: 'Start: Back',
+    
+    // Study Hub - NEW KEYS
+    studyHub: 'Study Hub',
+    practiceRecognition: 'Practice Recognition',
+    studyDashboard: 'Study Dashboard',
+    overallProgress: 'Overall Progress',
+    studyByCategory: 'Study by Category',
+    yourProgressAtGlance: 'Your progress at a glance.',
+    learning: 'Learning',
+    practicing: 'Practicing',
+    mastered: 'Mastered',
+    cardsNotReviewedYet: 'Cards you haven\'t reviewed yet.',
+    reviewedCardsNeedPractice: 'Reviewed cards you need to practice.',
+    passedRecognitionTest: 'You\'ve passed the recognition test.',
+    cards: 'cards',
+    study: 'Study',
+    recognition: 'Recognition',
+    review: 'Review',
     
     // Flashcard Form
     createFlashcard: 'Create Flashcard',
@@ -71,6 +107,8 @@ export const translations = {
     theme: 'Theme',
     lightMode: 'Light Mode',
     darkMode: 'Dark Mode',
+    studyTargetLanguage: 'Study Target Language',
+    studyTargetLanguageDescription: 'Choose which language you want to learn with your flashcards',
     
     // Study Modes
     flashcardMode: 'Flashcard Mode',
@@ -130,7 +168,7 @@ export const translations = {
     cancelCategoryCreation: 'Cancelar creación de categoría',
     deleteCategoryConfirm: '¿Estás seguro de que quieres eliminar esta categoría? Esto también eliminará la categoría de todas las tarjetas asociadas.',
     
-    // Study
+    // Study Interface
     startStudy: 'Comenzar Estudio',
     studySession: 'Sesión de Estudio',
     showAnswer: 'Mostrar Respuesta',
@@ -140,6 +178,42 @@ export const translations = {
     incorrect: 'Incorrecto',
     studyComplete: '¡Estudio Completado!',
     studyAgain: 'Estudiar de Nuevo',
+    exitSession: 'Salir de Sesión',
+    tapToSeeTranslation: 'Toca para ver traducción',
+    tapToReturn: 'Toca para regresar',
+    swipeOrUseButtons: 'Desliza o usa los botones para responder',
+    swipeLeftRight: 'Desliza izquierda/derecha para responder',
+    iKnow: 'Lo Sé',
+    iDontKnow: 'No Lo Sé',
+    hideImages: 'Ocultar Imágenes',
+    showImages: 'Mostrar Imágenes',
+    frontLearning: 'Frente',
+    frontEnglish: 'Frente',
+    cardReviewed: 'Tarjeta Revisada',
+    
+    // Add these new keys
+    front: 'Frente',
+    back: 'Atrás',
+    startFront: 'Inicio: Frente',
+    startBack: 'Inicio: Atrás',
+    
+    // Study Hub - NEW KEYS
+    studyHub: 'Centro de Estudio',
+    practiceRecognition: 'Practicar Reconocimiento',
+    studyDashboard: 'Panel de Estudio',
+    overallProgress: 'Progreso General',
+    studyByCategory: 'Estudiar por Categoría',
+    yourProgressAtGlance: 'Tu progreso de un vistazo.',
+    learning: 'Aprendiendo',
+    practicing: 'Practicando',
+    mastered: 'Dominado',
+    cardsNotReviewedYet: 'Tarjetas que aún no has revisado.',
+    reviewedCardsNeedPractice: 'Tarjetas revisadas que necesitas practicar.',
+    passedRecognitionTest: 'Has pasado la prueba de reconocimiento.',
+    cards: 'tarjetas',
+    study: 'Estudiar',
+    recognition: 'Reconocimiento',
+    review: 'Revisar',
     
     // Flashcard Form
     createFlashcard: 'Crear Tarjeta',
@@ -178,6 +252,8 @@ export const translations = {
     theme: 'Tema',
     lightMode: 'Modo Claro',
     darkMode: 'Modo Oscuro',
+    studyTargetLanguage: 'Idioma de Estudio',
+    studyTargetLanguageDescription: 'Elige qué idioma quieres aprender con tus tarjetas',
     
     // Study Modes
     flashcardMode: 'Modo Tarjetas',

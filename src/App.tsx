@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useAppContext } from './context/AppContext';
 import Layout from './components/layout/Layout';
@@ -27,6 +27,39 @@ const ThemeManager: React.FC = () => {
   return null; // Este componente no renderiza nada
 };
 
+// Component to handle rotation overlay
+const RotationOverlay: React.FC = () => {
+  const [isLandscape, setIsLandscape] = useState(false);
+
+  useEffect(() => {
+    const checkOrientation = () => {
+      const isLandscapeMode = window.innerHeight < window.innerWidth && window.innerHeight < 500;
+      setIsLandscape(isLandscapeMode);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
+
+  if (!isLandscape) return null;
+
+  return (
+    <div className="rotation-overlay">
+      <div className="rotation-icon">📱</div>
+      <div>
+        <h2 style={{ marginBottom: '10px', fontSize: '20px' }}>Please rotate your device</h2>
+        <p>This app works best in portrait mode</p>
+      </div>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   const [showWelcome, setShowWelcome] = React.useState<boolean>(() => !localStorage.getItem('hasSeenWelcome'));
 
@@ -41,10 +74,40 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // Enhanced orientation lock
+  useEffect(() => {
+    // Lock screen orientation to portrait if supported
+    if ('screen' in window && 'orientation' in window.screen) {
+      const screen = window.screen as any;
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('portrait').catch((err: any) => {
+          console.log('Orientation lock not supported:', err);
+        });
+      }
+    }
+    
+    // Prevent zoom on double tap
+    let lastTouchEnd = 0;
+    const preventZoom = (e: TouchEvent) => {
+      const now = (new Date()).getTime();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    };
+    
+    document.addEventListener('touchend', preventZoom, { passive: false });
+    
+    return () => {
+      document.removeEventListener('touchend', preventZoom);
+    };
+  }, []);
+
   if (showWelcome) {
     return (
       <>
         <ThemeManager />
+        <RotationOverlay />
         <WelcomeScreen
           onFinish={() => {
             localStorage.setItem('hasSeenWelcome', 'true');
@@ -58,6 +121,7 @@ const App: React.FC = () => {
   return (
     <>
       <ThemeManager />
+      <RotationOverlay />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />

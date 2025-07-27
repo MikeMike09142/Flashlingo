@@ -7,6 +7,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const CARDS_PER_SESSION = 30;
 
@@ -21,6 +22,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 
 const EnhancedStudySystem: React.FC<{ onStartSession: (session: StudySession) => void; }> = ({ onStartSession }) => {
   const { flashcards, categories, studyTargetLanguage } = useAppContext();
+  const { t } = useTranslation();
   const [openCategory, setOpenCategory] = useState<string | null>(null);
 
   const progressStats = useMemo(() => {
@@ -107,12 +109,12 @@ const EnhancedStudySystem: React.FC<{ onStartSession: (session: StudySession) =>
   return (
     <div className="space-y-6 md:space-y-8 p-2 md:p-4 select-none">
       <div className="text-center select-none">
-        <h1 className="text-3xl md:text-4xl font-bold text-neutral-800 dark:text-neutral-100 select-none">Study Dashboard</h1>
-        <p className="text-neutral-500 dark:text-neutral-400 mt-1 select-none">Your progress at a glance.</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-neutral-800 dark:text-neutral-100 select-none">{t('studyDashboard')}</h1>
+        <p className="text-neutral-500 dark:text-neutral-400 mt-1 select-none">{t('yourProgressAtGlance')}</p>
       </div>
 
       <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl shadow-md select-none">
-        <h2 className="text-xl font-semibold mb-4 text-center select-none">Overall Progress</h2>
+        <h2 className="text-xl font-semibold mb-4 text-center select-none">{t('overallProgress')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
           <div className="h-64 md:h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -125,27 +127,27 @@ const EnhancedStudySystem: React.FC<{ onStartSession: (session: StudySession) =>
             </ResponsiveContainer>
           </div>
           <div className="select-none">
-            <h3 className="text-lg font-semibold mb-2 select-none">Overall Progress</h3>
+            <h3 className="text-lg font-semibold mb-2 select-none">{t('overallProgress')}</h3>
             <ul className="space-y-2 select-none">
               <li className="flex items-center gap-2 select-none">
                 <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: COLORS[0] }}></span>
-                <span className="font-bold select-none">Learning</span>
+                <span className="font-bold select-none">{t('learning')}</span>
                 <span className="ml-2 text-sm text-blue-400 font-bold select-none">{progressStats.pieData[0].value}</span>
-                <span className="ml-1 text-sm text-neutral-400 select-none">Cards you haven't reviewed yet.</span>
+                <span className="ml-1 text-sm text-neutral-400 select-none">{t('cardsNotReviewedYet')}</span>
               </li>
               <li className="flex items-center gap-2 select-none">
                 <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: COLORS[1] }}></span>
-                <span className="font-bold select-none">Practicing</span>
+                <span className="font-bold select-none">{t('practicing')}</span>
                 <span className="ml-2 text-sm text-purple-400 font-bold select-none">{progressStats.pieData[1].value}</span>
-                <span className="ml-1 text-sm text-neutral-400 select-none">Reviewed cards you need to practice.</span>
+                <span className="ml-1 text-sm text-neutral-400 select-none">{t('reviewedCardsNeedPractice')}</span>
               </li>
               <li className="flex items-start gap-2 flex-wrap select-none">
                 <span className="w-3 h-3 rounded-full inline-block mt-1" style={{ backgroundColor: COLORS[2] }}></span>
                 <div className="flex-1 min-w-0 select-none">
                   <div className="flex items-center gap-1 flex-wrap select-none">
-                    <span className="font-bold select-none">Mastered</span>
+                    <span className="font-bold select-none">{t('mastered')}</span>
                     <span className="text-sm text-green-400 font-bold select-none">{progressStats.mastered}</span>
-                    <span className="ml-1 text-sm text-neutral-400 select-none">You've passed the recognition test.</span>
+                    <span className="ml-1 text-sm text-neutral-400 select-none">{t('passedRecognitionTest')}</span>
                   </div>
                   {Object.keys(progressStats.masteredByLevel).length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1 select-none">
@@ -167,15 +169,15 @@ const EnhancedStudySystem: React.FC<{ onStartSession: (session: StudySession) =>
       </div>
 
       <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl shadow-md select-none">
-        <h2 className="text-xl font-semibold mb-4 select-none">Study Hub</h2>
+        <h2 className="text-xl font-semibold mb-4 select-none">{t('studyHub')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button onClick={() => handleStartSession('review', sessionDecks.reviewDeck)} disabled={sessionDecks.reviewDeck.length === 0} className="p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold disabled:bg-neutral-400 text-center"><h3 className="text-lg">Study Cards</h3><p>({sessionDecks.reviewDeck.length} cards)</p></button>
-            <button onClick={() => handleStartSession('recognition', sessionDecks.recognitionDeck)} disabled={sessionDecks.recognitionDeck.length === 0} className="p-4 bg-purple-500 text-white rounded-lg hover:bg-purple-600 font-semibold disabled:bg-neutral-400 text-center"><h3 className="text-lg">Practice Recognition</h3><p>({sessionDecks.recognitionDeck.length} cards)</p></button>
+            <button onClick={() => handleStartSession('review', sessionDecks.reviewDeck)} disabled={sessionDecks.reviewDeck.length === 0} className="p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold disabled:bg-neutral-400 text-center"><h3 className="text-lg">{t('studyCards')}</h3><p>({sessionDecks.reviewDeck.length} {t('cards')})</p></button>
+            <button onClick={() => handleStartSession('recognition', sessionDecks.recognitionDeck)} disabled={sessionDecks.recognitionDeck.length === 0} className="p-4 bg-purple-500 text-white rounded-lg hover:bg-purple-600 font-semibold disabled:bg-neutral-400 text-center"><h3 className="text-lg">{t('practiceRecognition')}</h3><p>({sessionDecks.recognitionDeck.length} {t('cards')})</p></button>
         </div>
       </div>
 
       <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl shadow-md select-none">
-        <h2 className="text-xl font-semibold mb-4 select-none">Study by Category</h2>
+        <h2 className="text-xl font-semibold mb-4 select-none">{t('studyByCategory')}</h2>
         <div className="space-y-2">
           {categories.map(category => {
             const categoryCards = flashcards.filter(c => c.categoryIds.includes(category.id));
@@ -190,19 +192,19 @@ const EnhancedStudySystem: React.FC<{ onStartSession: (session: StudySession) =>
                 <button onClick={() => !isCompleted && setOpenCategory(openCategory === category.id ? null : category.id)} className={`w-full p-3 flex items-center justify-between select-none ${isCompleted ? 'cursor-default' : ''}`}>
                   <span className="font-semibold select-none">{category.name} ({categoryCards.length})</span>
                   <div className="flex items-center gap-2 select-none">
-                    <span className="text-sm text-neutral-500 select-none">{progress}% Mastered</span>
+                    <span className="text-sm text-neutral-500 select-none">{progress}% {t('mastered')}</span>
                     {!isCompleted && <ChevronDown className={`transition-transform ${openCategory === category.id ? 'rotate-180' : ''}`} />}
                   </div>
                 </button>
                 {isCompleted ? (
                    <div className="p-3 border-t dark:border-neutral-700">
-                     <button onClick={() => handleStartSession('freestyle_review', categoryCards.map(c => c.id))} className="w-full p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Review</button>
+                     <button onClick={() => handleStartSession('freestyle_review', categoryCards.map(c => c.id))} className="w-full p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">{t('review')}</button>
                    </div>
                 ) : (
                   openCategory === category.id && (
                     <div className="p-3 border-t dark:border-neutral-700 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                      <button onClick={() => handleStartSession('review', categoryDecks.review)} disabled={categoryDecks.review.length === 0} className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-neutral-400">Study ({categoryDecks.review.length})</button>
-                      <button onClick={() => handleStartSession('recognition', categoryDecks.recognition)} disabled={categoryDecks.recognition.length === 0} className="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-neutral-400">Recognition ({categoryDecks.recognition.length})</button>
+                      <button onClick={() => handleStartSession('review', categoryDecks.review)} disabled={categoryDecks.review.length === 0} className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-neutral-400">{t('study')} ({categoryDecks.review.length})</button>
+                      <button onClick={() => handleStartSession('recognition', categoryDecks.recognition)} disabled={categoryDecks.recognition.length === 0} className="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-neutral-400">{t('recognition')} ({categoryDecks.recognition.length})</button>
                     </div>
                   )
                 )}
@@ -215,4 +217,4 @@ const EnhancedStudySystem: React.FC<{ onStartSession: (session: StudySession) =>
   );
 };
 
-export default EnhancedStudySystem; 
+export default EnhancedStudySystem;
