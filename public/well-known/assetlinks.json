@@ -1,0 +1,11 @@
+
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.vercel.flashlingo_xi.twa",
+    "sha256_cert_fingerprints": [
+      "63:BB:2B:65:42:3C:AA:A2:4B:BB:14:19:CB:9E:EA:F7:77:41:5B:CE:4F:76:B4:19:FE:9E:BB:B6:29:9B:3B:55"
+    ]
+  }
+}]
